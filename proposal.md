@@ -10,19 +10,12 @@ The goal of this project is to better understand the general trend of wind turbi
 3. Who are wind turbines benefitting? Who is living in areas with wind turbines in terms of socioeconomic class and other metrics?
 
 ## Data
-
-Please prepare a short proposal on your final project idea for next **Friday, Nov 2**. The proposal should include:
+The United States Geological Survey (USGS) provides free access to the United States Wind Turbine Database which gives the locations of both land-based and offshore wind turbines in the United States, wind project information, and turbine technical specifications. The USWTDB can be downloaded as a shapefile and in CSV format. (Source: https://eerscmap.usgs.gov/uswtdb/data/)
 
 - Title & description of the project
-- Your name & partner's name
 - A description of the data required, and how it will be obtained (e.g. URL/DOI to data source)
 
-*You may choose to work with your partner or independently on the final project. Please indicate which clearly in your proposal.*
-
 Replicating results of an existing study and exploring the impact of alternative assumptions in the data preparation, statistical methods chosen etc can provide an excellent template for an analysis (you'll see more of this in units 3 & 4)
-
-
-Please create your proposal in a markdown file called `proposal.md` in the root directory of the final project repo.  
 
 
 ## Preliminary Rubric (additional areas will be added)
