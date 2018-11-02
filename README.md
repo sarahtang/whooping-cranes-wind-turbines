@@ -3,8 +3,7 @@
 
 ## Team Members:
 
-- full name, github handle
-- full name, github handle
+- Sarah Tang, sarahtang
 
 This repository is a template for your team's repository.
 
