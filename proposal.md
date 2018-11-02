@@ -4,19 +4,18 @@
 ### Sarah Tang
 The goal of this project is to better understand the general trend of wind turbine development overtime and by location. As land use needed for wind energy increases, it is crucial to understand the impact of wind turbine development on animals' responses and wildlife habitat.
 
+One specific example is the whooping crane, one of the most endangered birds in North America. However, it is unclear how whooping cranes will react to wind turbines. Further reading (http://www.neo.ne.gov/renew/wind-working-group/wind-whoopingcranes.pdf, https://www.fws.gov/southwest/es/Oklahoma/documents/te_species/wind%20power/whooping%20crane%20and%20wind%20development%20fws%20issue%20paper%20-%20final%20%20april%202009.pdf)
+
 ## Questions & Analysis
-1. Where are wind trubines most prevalent within the United States by state? What is common about these states?
+1. Where are wind turbines most prevalent within the United States by state? What is common about these states?
 2. What is the general trend of wind turbine development over time? Is this correlated with overall wind turbine capacity?
-3. Who are wind turbines benefitting? Who is living in areas with wind turbines in terms of socioeconomic class and other metrics?
+3. Are there overlaps in the location of wind turbine sites and the whooping crane migratory patterns?
+4. Is the height at which whooping cranes fly similar to the height of wind turbines installed in similar areas?
 
 ## Data
-The United States Geological Survey (USGS) provides free access to the United States Wind Turbine Database which gives the locations of both land-based and offshore wind turbines in the United States, wind project information, and turbine technical specifications. The USWTDB can be downloaded as a shapefile and in CSV format. (Source: https://eerscmap.usgs.gov/uswtdb/data/)
+The United States Geological Survey (USGS) provides free access to the United States Wind Turbine Database which gives the locations of both land-based and offshore wind turbines in the United States, wind project information, and turbine technical specifications. The USWTDB can be downloaded as a shapefile and in CSV format. (Source: https://eerscmap.usgs.gov/uswtdb/data/, https://pubs.usgs.gov/ds/817/)
 
-- Title & description of the project
-- A description of the data required, and how it will be obtained (e.g. URL/DOI to data source)
-
-Replicating results of an existing study and exploring the impact of alternative assumptions in the data preparation, statistical methods chosen etc can provide an excellent template for an analysis (you'll see more of this in units 3 & 4)
-
+Whooping crane migration corridor data and precision estimates can be found here (https://www.sciencebase.gov/catalog/item/5a314a72e4b08e6a89d707e0), provided by USGS. Additionally, this .csv file includes the locations within the migration corridor (https://www.sciencebase.gov/catalog/item/5a0c6f50e4b09af898cd3fcd).
 
 ## Preliminary Rubric (additional areas will be added)
 
