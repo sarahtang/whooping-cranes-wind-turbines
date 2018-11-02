@@ -1,12 +1,21 @@
 # Final project proposal
 
+## Understanding the prevalence of wind turbine development and its impact on energy-widlife interactions
+### Sarah Tang
+The goal of this project is to better understand the general trend of wind turbine development overtime and by location. As land use needed for wind energy increases, it is crucial to understand the impact of wind turbine development on animals' responses and wildlife habitat.
 
-Please prepare a short proposal on your final project idea for next **Thursday, Nov 2**. The proposal should include:
+## Questions & Analysis
+1. Where are wind trubines most prevalent within the United States by state? What is common about these states?
+2. What is the general trend of wind turbine development over time? Is this correlated with overall wind turbine capacity?
+3. Who are wind turbines benefitting? Who is living in areas with wind turbines in terms of socioeconomic class and other metrics?
+
+## Data
+
+Please prepare a short proposal on your final project idea for next **Friday, Nov 2**. The proposal should include:
 
 - Title & description of the project
 - Your name & partner's name
 - A description of the data required, and how it will be obtained (e.g. URL/DOI to data source)
-- 3 questions / analysis tasks you will perform on the data; in the spirit of the assignments we have been doing.
 
 *You may choose to work with your partner or independently on the final project. Please indicate which clearly in your proposal.*
 
