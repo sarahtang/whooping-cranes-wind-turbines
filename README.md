@@ -1,5 +1,5 @@
 
-*add travis-ci badge here*
+[![Build Status](https://travis-ci.com/espm-157/final-project-individual-option-sarahtang.svg?token=N7vjQnawxqcEd7wx9dvu&branch=master)](https://travis-ci.com/espm-157/final-project-individual-option-sarahtang)
 
 ## Team Members:
 

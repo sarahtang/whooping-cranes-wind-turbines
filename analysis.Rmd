@@ -1,0 +1,72 @@
+---
+title: "analysis"
+author: Sarah Tang
+output: github_document
+---
+
+# Set Up
+```{r message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(sf)
+library(tmap)
+library(USAboundaries)
+library(fasterize)
+```
+
+## Introduction
+This module aims to examine and better understand how wind turbine development impacts bird populations, specifically for the whooping crane (Grus americana), one of the most endangered birds in North America. As land use needed for wind energy increases, it is crucial to understand the relationship between wind turbines, both while operating and installing, and animals' responses and wildlife habitat.
+
+Whooping crane corridor - https://www.sciencebase.gov/catalog/item/5a314a72e4b08e6a89d707e0
+Whooping crane - https://www.arcgis.com/home/item.html?id=7d27571bc3454a1c91edf665c67b9c3e
+
+
+## Loading in files
+```{r}
+wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet=TRUE)
+whooping_crane_corridors <- st_read("WHCR_corridors/WHCR_corridors.shp", quiet=TRUE)
+whooping_crane <- st_read("WhoopingCrane/WhoopingCraneHabitat.shp", quiet=TRUE)
+
+wind_turbines
+whooping_crane_corridors
+whooping_crane
+```
+
+# Mapping Wind Turbines
+Next, I plot the maps of the location of wind turbines using `ggplot` and the `geom_sf` command.
+
+```{r message=FALSE}
+ggplot(wind_turbines) + geom_sf()
+tm_shape(wind_turbines) + tm_dots()
+```
+```{r}
+land <- us_states()
+land
+
+tmap_mode(mode = "plot") #change mode to plot
+
+tm_shape(land) +
+  tm_polygons("state_name", lengend.show = FALSE)
+```
+
+# Mapping Whooping Crane Migratory Paths
+```{r}
+ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
+
+```
+
+
+## Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
+
+#TODO:
+
+Custom R functions
+Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct?
+Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues)
+Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton
+Use of spatial vector data (sf package) and visualization of spatial data
+
+
+
+# TODO
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
