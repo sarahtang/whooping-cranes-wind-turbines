@@ -8,10 +8,8 @@ output: github_document
 ```{r message=FALSE}
 library(tidyverse)
 library(ggplot2)
-library(sf)
 library(tmap)
 library(USAboundaries)
-library(fasterize)
 ```
 
 ## Introduction
@@ -25,20 +23,24 @@ Whooping crane - https://www.arcgis.com/home/item.html?id=7d27571bc3454a1c91edf6
 ```{r}
 wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet=TRUE)
 whooping_crane_corridors <- st_read("WHCR_corridors/WHCR_corridors.shp", quiet=TRUE)
-whooping_crane <- st_read("WhoopingCrane/WhoopingCraneHabitat.shp", quiet=TRUE)
+#whooping_crane <- st_read("WhoopingCrane/WhoopingCraneHabitat.shp", quiet=TRUE)
 
 wind_turbines
 whooping_crane_corridors
-whooping_crane
+#whooping_crane
 ```
 
 # Mapping Wind Turbines
 Next, I plot the maps of the location of wind turbines using `ggplot` and the `geom_sf` command.
 
 ```{r message=FALSE}
-ggplot(wind_turbines) + geom_sf()
+#ggplot(wind_turbines) + geom_sf()
 tm_shape(wind_turbines) + tm_dots()
+
+#todo add map overlay on this
 ```
+
+
 ```{r}
 land <- us_states()
 land
