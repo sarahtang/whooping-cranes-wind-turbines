@@ -5,14 +5,6 @@ Sarah Tang
 Set Up
 ======
 
-``` r
-library(tidyverse)
-library(ggplot2)
-library(sf)
-library(tmap)
-library(USAboundaries)
-```
-
 Introduction
 ------------
 
@@ -26,7 +18,6 @@ Loading in files
 ``` r
 wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet=TRUE)
 whooping_crane_corridors <- st_read("WHCR_corridors/WHCR_corridors.shp", quiet=TRUE)
-#whooping_crane <- st_read("WhoopingCrane/WhoopingCraneHabitat.shp", quiet=TRUE)
 
 wind_turbines
 ```
@@ -71,10 +62,6 @@ whooping_crane_corridors
     ## 8  0       50  E POLYGON ((-38234.65 -132200...
     ## 9  0       50  W POLYGON ((-101020.2 -132200...
 
-``` r
-#whooping_crane
-```
-
 Mapping Wind Turbines
 =====================
 
@@ -86,10 +73,6 @@ tm_shape(wind_turbines) + tm_dots()
 ```
 
 ![](analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
-
-``` r
-#todo add map overlay on this
-```
 
 ``` r
 land <- us_states()
@@ -145,7 +128,10 @@ tmap_mode(mode = "plot") #change mode to plot
 
 ``` r
 tm_shape(land) +
-  tm_polygons("state_name", lengend.show = FALSE)
+  tm_polygons("state_name", legend.show = FALSE) +
+  tm_shape(wind_turbines) +
+  tm_dots() +
+  tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5)
 ```
 
     ## Warning: Number of levels of the variable "state_name" is 52, which is
@@ -165,6 +151,9 @@ ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration
 
 Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
 -----------------------------------------------------------------------------------------------
+
+Other bird populations?
+=======================
 
 TODO:
 =====

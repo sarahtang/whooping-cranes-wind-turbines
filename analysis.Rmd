@@ -5,7 +5,7 @@ output: github_document
 ---
 
 # Set Up
-```{r message=FALSE}
+```{r include=FALSE}
 library(tidyverse)
 library(ggplot2)
 library(sf)
@@ -24,23 +24,17 @@ Whooping crane - https://www.arcgis.com/home/item.html?id=7d27571bc3454a1c91edf6
 ```{r}
 wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet=TRUE)
 whooping_crane_corridors <- st_read("WHCR_corridors/WHCR_corridors.shp", quiet=TRUE)
-#whooping_crane <- st_read("WhoopingCrane/WhoopingCraneHabitat.shp", quiet=TRUE)
 
 wind_turbines
 whooping_crane_corridors
-#whooping_crane
 ```
 
 # Mapping Wind Turbines
 Next, I plot the maps of the location of wind turbines using `ggplot` and the `geom_sf` command.
-
-```{r message=FALSE}
+```{r}
 #ggplot(wind_turbines) + geom_sf()
 tm_shape(wind_turbines) + tm_dots()
-
-#todo add map overlay on this
 ```
-
 
 ```{r}
 land <- us_states()
@@ -49,17 +43,21 @@ land
 tmap_mode(mode = "plot") #change mode to plot
 
 tm_shape(land) +
-  tm_polygons("state_name", lengend.show = FALSE)
+  tm_polygons("state_name", legend.show = FALSE) +
+  tm_shape(wind_turbines) +
+  tm_dots() +
+  tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5)
+  
 ```
 
 # Mapping Whooping Crane Migratory Paths
 ```{r}
 ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
-
 ```
 
-
 ## Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
+
+#Other bird populations?
 
 #TODO:
 
