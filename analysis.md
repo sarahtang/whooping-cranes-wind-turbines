@@ -1,4 +1,4 @@
-Wind Turbine Analysis
+Wind Turbine and Bird Analysis
 ================
 Sarah Tang
 
@@ -62,10 +62,10 @@ whooping_crane_corridors
     ## 8  0       50  E POLYGON ((-38234.65 -132200...
     ## 9  0       50  W POLYGON ((-101020.2 -132200...
 
-Mapping Wind Turbines
-=====================
+Mapping Wind Turbines and Whooping Crane Migratory Paths
+========================================================
 
-Next, I plot the maps of the location of wind turbines using `ggplot` and the `geom_sf` command.
+Next, I plot the maps of the location of wind turbines and whooping crane patterns using `ggplot` and the `geom_sf` command.
 
 ``` r
 #ggplot(wind_turbines) + geom_sf()
@@ -74,7 +74,13 @@ tm_shape(wind_turbines) + tm_dots()
 
 ![](analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
-I then overlay the locations of the wind turbines on a map of the United States.
+``` r
+ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
+```
+
+![](analysis_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+I then overlay the two maps onto a map of the United States.
 
 ``` r
 land <- us_states()
@@ -131,32 +137,6 @@ tmap_mode(mode = "plot") #change mode to plot
 ``` r
 tm_shape(land) +
   tm_polygons("state_name", legend.show = FALSE) +
-  tm_shape(wind_turbines) +
-  tm_dots() +
-  tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5)
-```
-
-    ## Warning: Number of levels of the variable "state_name" is 52, which is
-    ## larger than max.categories (which is 30), so levels are combined. Set
-    ## tmap_options(max.categories = 52) in the layer function to show all levels.
-
-![](analysis_files/figure-markdown_github/unnamed-chunk-4-1.png)
-
-Mapping Whooping Crane Migratory Paths
-======================================
-
-``` r
-ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
-```
-
-![](analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
-
-Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
------------------------------------------------------------------------------------------------
-
-``` r
-tm_shape(land) +
-  tm_polygons("state_name", legend.show = FALSE) +
   tm_shape(whooping_crane_corridors) +
   tm_polygons() +
   tm_shape(wind_turbines) +
@@ -165,7 +145,11 @@ tm_shape(land) +
   tmap_options(max.categories = 52)
 ```
 
-![](analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
+### Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
+
+*Yes! By overlaying the three different shape files, we can see that where there is high wind in the United States (in the midwest), is where wind turbines are primarily located.*
 
 Other bird populations?
 =======================
@@ -180,7 +164,7 @@ resp
 ```
 
     ## Response [http://api.iucnredlist.org/index/species/Grus-americana.json]
-    ##   Date: 2018-12-08 00:54
+    ##   Date: 2018-12-08 02:41
     ##   Status: 200
     ##   Content-Type: application/json; charset=utf-8
     ##   Size: 1.02 kB

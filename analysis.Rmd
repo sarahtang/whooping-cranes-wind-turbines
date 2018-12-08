@@ -1,5 +1,5 @@
 ---
-title: "Wind Turbine Analysis"
+title: "Wind Turbine and Bird Analysis"
 maketitle: true
 author: Sarah Tang
 output: github_document
@@ -11,13 +11,7 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 
 ## Set Up
 ```{r include=FALSE}
-library("tidyverse")
-library("ggplot2")
-library("sf")
-library("tmap")
-library("USAboundaries")
-library("httr")
-library("jsonlite")
+
 ```
 
 ## Introduction
@@ -36,14 +30,17 @@ wind_turbines
 whooping_crane_corridors
 ```
 
-# Mapping Wind Turbines
-Next, I plot the maps of the location of wind turbines using `ggplot` and the `geom_sf` command.
+# Mapping Wind Turbines and Whooping Crane Migratory Paths
+Next, I plot the maps of the location of wind turbines and whooping crane patterns using `ggplot` and the `geom_sf` command.
 ```{r}
 #ggplot(wind_turbines) + geom_sf()
 tm_shape(wind_turbines) + tm_dots()
 ```
+```{r}
+ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
+```
 
-I then overlay the locations of the wind turbines on a map of the United States.
+I then overlay the two maps onto a map of the United States.
 ```{r}
 land <- us_states()
 land
@@ -52,28 +49,17 @@ tmap_mode(mode = "plot") #change mode to plot
 
 tm_shape(land) +
   tm_polygons("state_name", legend.show = FALSE) +
-  tm_shape(wind_turbines) +
-  tm_dots() +
-  tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5)
-  
-```
-
-# Mapping Whooping Crane Migratory Paths
-```{r}
-ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
-```
-
-## Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
-```{r}
-tm_shape(land) +
-  tm_polygons("state_name", legend.show = FALSE) +
   tm_shape(whooping_crane_corridors) +
   tm_polygons() +
   tm_shape(wind_turbines) +
   tm_dots() +
   tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5) +
   tmap_options(max.categories = 52)
+  
 ```
+
+### Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
+*Yes! By overlaying the three different shape files, we can see that where there is high wind in the United States (in the midwest), is where wind turbines are primarily located.*
 
 
 #Other bird populations?
