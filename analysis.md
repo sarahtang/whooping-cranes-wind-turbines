@@ -11,7 +11,6 @@ library(ggplot2)
 library(sf)
 library(tmap)
 library(USAboundaries)
-library(fasterize)
 ```
 
 Introduction
@@ -27,7 +26,7 @@ Loading in files
 ``` r
 wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet=TRUE)
 whooping_crane_corridors <- st_read("WHCR_corridors/WHCR_corridors.shp", quiet=TRUE)
-whooping_crane <- st_read("WhoopingCrane/WhoopingCraneHabitat.shp", quiet=TRUE)
+#whooping_crane <- st_read("WhoopingCrane/WhoopingCraneHabitat.shp", quiet=TRUE)
 
 wind_turbines
 ```
@@ -73,71 +72,8 @@ whooping_crane_corridors
     ## 9  0       50  W POLYGON ((-101020.2 -132200...
 
 ``` r
-whooping_crane
+#whooping_crane
 ```
-
-    ## Simple feature collection with 15331 features and 26 fields
-    ## geometry type:  MULTIPOLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: 239723.8 ymin: 4274293 xmax: 757123.8 ymax: 4543201
-    ## epsg (SRID):    26913
-    ## proj4string:    +proj=utm +zone=13 +datum=NAD83 +units=m +no_defs
-    ## First 10 features:
-    ##    FID_Stream FID_STRE_1   LENGTH STWAT_ID             NAME CO_FIPS
-    ## 1        4018       3837 3419.834        1 East Shell Creek      69
-    ## 2        4034       3853 4058.223        1             <NA>      69
-    ## 3       17179      17017 4224.354        1             <NA>     125
-    ## 4       17589      17429 4621.074        1       Crow Creek     123
-    ## 5       18802      18641  198.527        1       Fish Creek      69
-    ## 6       18803      18642  135.107        1             <NA>      69
-    ## 7       18804      18643  170.080        1   Spotwood Creek      69
-    ## 8       18806      18645  493.665        1             <NA>      69
-    ## 9       18810      18649  555.067        1             <NA>      69
-    ## 10      18812      18651  581.521        1       Fish Creek      69
-    ##    Shape_Leng FID_CODivi DIV        BASIN Perimeter        Area    Acres
-    ## 1   3419.8341          0   1 South Platte   1445412 72759746777 17979325
-    ## 2   4058.2227          0   1 South Platte   1445412 72759746777 17979325
-    ## 3   4224.3535          0   1 South Platte   1445412 72759746777 17979325
-    ## 4   4621.0744          0   1 South Platte   1445412 72759746777 17979325
-    ## 5    198.5272          0   1 South Platte   1445412 72759746777 17979325
-    ## 6    135.1070          0   1 South Platte   1445412 72759746777 17979325
-    ## 7    170.0801          0   1 South Platte   1445412 72759746777 17979325
-    ## 8    493.6646          0   1 South Platte   1445412 72759746777 17979325
-    ## 9    555.0668          0   1 South Platte   1445412 72759746777 17979325
-    ## 10   581.5209          0   1 South Platte   1445412 72759746777 17979325
-    ##    FID_Statew COUNTY CO_FIPS_1 POP_2000 HOUSEHO_00 SHAPE_Le_1 SHAPE_Area
-    ## 1          -1   <NA>         0        0          0          0          0
-    ## 2          -1   <NA>         0        0          0          0          0
-    ## 3          -1   <NA>         0        0          0          0          0
-    ## 4          -1   <NA>         0        0          0          0          0
-    ## 5          -1   <NA>         0        0          0          0          0
-    ## 6          -1   <NA>         0        0          0          0          0
-    ## 7          -1   <NA>         0        0          0          0          0
-    ## 8          -1   <NA>         0        0          0          0          0
-    ## 9          -1   <NA>         0        0          0          0          0
-    ## 10         -1   <NA>         0        0          0          0          0
-    ##    BUFF_DIST ORIG_FID OBJECTID GNIS_ID GNIS_Name L_Miles
-    ## 1         50        0        0    <NA>      <NA>       0
-    ## 2         50        1        0    <NA>      <NA>       0
-    ## 3         50        2        0    <NA>      <NA>       0
-    ## 4         50        3        0    <NA>      <NA>       0
-    ## 5         50        4        0    <NA>      <NA>       0
-    ## 6         50        5        0    <NA>      <NA>       0
-    ## 7         50        6        0    <NA>      <NA>       0
-    ## 8         50        7        0    <NA>      <NA>       0
-    ## 9         50        8        0    <NA>      <NA>       0
-    ## 10        50        9        0    <NA>      <NA>       0
-    ##                          geometry
-    ## 1  MULTIPOLYGON (((427692.6 45...
-    ## 2  MULTIPOLYGON (((497293 4538...
-    ## 3  MULTIPOLYGON (((752161.2 44...
-    ## 4  MULTIPOLYGON (((554221.5 45...
-    ## 5  MULTIPOLYGON (((462454.6 45...
-    ## 6  MULTIPOLYGON (((486626.7 45...
-    ## 7  MULTIPOLYGON (((503211.9 45...
-    ## 8  MULTIPOLYGON (((448002.7 45...
-    ## 9  MULTIPOLYGON (((450098.4 45...
-    ## 10 MULTIPOLYGON (((460302.6 45...
 
 Mapping Wind Turbines
 =====================
@@ -145,16 +81,15 @@ Mapping Wind Turbines
 Next, I plot the maps of the location of wind turbines using `ggplot` and the `geom_sf` command.
 
 ``` r
-ggplot(wind_turbines) + geom_sf()
+#ggplot(wind_turbines) + geom_sf()
+tm_shape(wind_turbines) + tm_dots()
 ```
 
 ![](analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 ``` r
-tm_shape(wind_turbines) + tm_dots()
+#todo add map overlay on this
 ```
-
-![](analysis_files/figure-markdown_github/unnamed-chunk-3-2.png)
 
 ``` r
 land <- us_states()

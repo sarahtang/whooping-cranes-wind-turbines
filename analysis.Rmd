@@ -8,6 +8,7 @@ output: github_document
 ```{r message=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(sf)
 library(tmap)
 library(USAboundaries)
 ```
