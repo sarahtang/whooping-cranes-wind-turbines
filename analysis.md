@@ -154,6 +154,19 @@ ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration
 Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
 -----------------------------------------------------------------------------------------------
 
+``` r
+tm_shape(land) +
+  tm_polygons("state_name", legend.show = FALSE) +
+  tm_shape(whooping_crane_corridors) +
+  tm_polygons() +
+  tm_shape(wind_turbines) +
+  tm_dots() +
+  tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5) +
+  tmap_options(max.categories = 52)
+```
+
+![](analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
+
 Other bird populations?
 =======================
 
@@ -167,7 +180,7 @@ resp
 ```
 
     ## Response [http://api.iucnredlist.org/index/species/Grus-americana.json]
-    ##   Date: 2018-12-08 00:48
+    ##   Date: 2018-12-08 00:54
     ##   Status: 200
     ##   Content-Type: application/json; charset=utf-8
     ##   Size: 1.02 kB

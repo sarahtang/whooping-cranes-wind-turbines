@@ -13,7 +13,6 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 ```{r include=FALSE}
 library("tidyverse")
 library("ggplot2")
-library("mapview")      # interactive maps, raster + vector layers
 library("raster")
 library("sf")
 library("tmap")
@@ -66,6 +65,17 @@ ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration
 ```
 
 ## Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
+```{r}
+tm_shape(land) +
+  tm_polygons("state_name", legend.show = FALSE) +
+  tm_shape(whooping_crane_corridors) +
+  tm_polygons() +
+  tm_shape(wind_turbines) +
+  tm_dots() +
+  tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5) +
+  tmap_options(max.categories = 52)
+```
+
 
 #Other bird populations?
 
