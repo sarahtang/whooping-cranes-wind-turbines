@@ -11,16 +11,15 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 
 ## Set Up
 ```{r include=FALSE}
-library(tidyverse)
-library(ggplot2)
-library(mapview)      # interactive maps, raster + vector layers
-library(raster)
+library("tidyverse")
+library("ggplot2")
+library("mapview")      # interactive maps, raster + vector layers
+library("raster")
 library("sf")
 library("tmap")
-library(USAboundaries)
+library("USAboundaries")
 library("httr")
 library("jsonlite")
-library(stringr)
 ```
 
 ## Introduction
@@ -69,6 +68,7 @@ ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration
 ## Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
 
 #Other bird populations?
+
 ```{r}
 genus <- "Grus"
 species <- "americana"
@@ -78,6 +78,11 @@ resp <- GET(api_call)
 resp
 
 status <- httr::status_code(resp)
+
+out <- content(resp, as = "text")
+df <- jsonlite::fromJSON(out)
+rationale <- df$rationale
+df
 ```
 
 

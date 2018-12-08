@@ -1,9 +1,9 @@
-analysis
+Wind Turbine Analysis
 ================
 Sarah Tang
 
 Set Up
-======
+------
 
 Introduction
 ------------
@@ -73,6 +73,8 @@ tm_shape(wind_turbines) + tm_dots()
 ```
 
 ![](analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+I then overlay the locations of the wind turbines on a map of the United States.
 
 ``` r
 land <- us_states()
@@ -154,6 +156,45 @@ Are there overlaps in the location of wind turbine sites and whooping crane migr
 
 Other bird populations?
 =======================
+
+``` r
+genus <- "Grus"
+species <- "americana"
+api_call <- paste0("http://api.iucnredlist.org/index/species/", genus, "-", species, ".json")
+
+resp <- GET(api_call)
+resp
+```
+
+    ## Response [http://api.iucnredlist.org/index/species/Grus-americana.json]
+    ##   Date: 2018-12-08 00:48
+    ##   Status: 200
+    ##   Content-Type: application/json; charset=utf-8
+    ##   Size: 1.02 kB
+
+``` r
+status <- httr::status_code(resp)
+
+out <- content(resp, as = "text")
+df <- jsonlite::fromJSON(out)
+rationale <- df$rationale
+df
+```
+
+    ##   scientific_name primary  kingdom   phylum class      order  family genus
+    ## 1  Grus americana    TRUE ANIMALIA CHORDATA  AVES GRUIFORMES GRUIDAE  Grus
+    ##     species        authority infra_name infra_rank infra_authority
+    ## 1 americana (Linnaeus, 1758)         NA         NA              NA
+    ##   stock_name species_id main_common_name modified_year category criteria
+    ## 1         NA   22692156   Whooping Crane          2012       EN        D
+    ##   assessmentid trend_id biome_marine biome_freshwater biome_terrestrial
+    ## 1     38458501        1         TRUE             TRUE              TRUE
+    ##   taxonomicnotes
+    ## 1             NA
+    ##                                                                                                                                                                                                                                                                                                                                                                                                         rationale
+    ## 1 This species is listed as Endangered because it has an extremely small population. However, the conservation status of the species is improving, with not only increases in the natural wild population but also establishment of two reintroduced flocks that may become self-sustaining. If the number of mature individuals continues to increase, this species may merit downlisting to Vulnerable. <p></p>
+    ##                 assessor                evaluator
+    ## 1 BirdLife International Butchart, S. & Symes, A.
 
 TODO:
 =====
