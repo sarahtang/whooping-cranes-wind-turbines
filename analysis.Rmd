@@ -13,7 +13,6 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 ```{r include=FALSE}
 library("tidyverse")
 library("ggplot2")
-library("raster")
 library("sf")
 library("tmap")
 library("USAboundaries")
