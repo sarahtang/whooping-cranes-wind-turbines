@@ -1,16 +1,26 @@
 ---
-title: "analysis"
+title: "Wind Turbine Analysis"
+maketitle: true
 author: Sarah Tang
 output: github_document
 ---
 
-# Set Up
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
+```
+
+## Set Up
 ```{r include=FALSE}
 library(tidyverse)
 library(ggplot2)
-library(sf)
-library(tmap)
+library(mapview)      # interactive maps, raster + vector layers
+library(raster)
+library("sf")
+library("tmap")
 library(USAboundaries)
+library("httr")
+library("jsonlite")
+library(stringr)
 ```
 
 ## Introduction
@@ -36,6 +46,7 @@ Next, I plot the maps of the location of wind turbines using `ggplot` and the `g
 tm_shape(wind_turbines) + tm_dots()
 ```
 
+I then overlay the locations of the wind turbines on a map of the United States.
 ```{r}
 land <- us_states()
 land
@@ -58,6 +69,17 @@ ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration
 ## Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
 
 #Other bird populations?
+```{r}
+genus <- "Grus"
+species <- "americana"
+api_call <- paste0("http://api.iucnredlist.org/index/species/", genus, "-", species, ".json")
+
+resp <- GET(api_call)
+resp
+
+status <- httr::status_code(resp)
+```
+
 
 #TODO:
 
