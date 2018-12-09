@@ -41,8 +41,9 @@ Whooping crane - https://www.arcgis.com/home/item.html?id=7d27571bc3454a1c91edf6
 
 ## Loading in files
 ```{r echo=FALSE}
-wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet=TRUE)
-whooping_crane_corridors <- st_read("WHCR_corridors/WHCR_corridors.shp", quiet=TRUE)
+wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet = TRUE)
+whooping_crane_corridors <-
+  st_read("WHCR_corridors/WHCR_corridors.shp", quiet = TRUE)
 ```
 
 # Mapping Wind Turbines and Whooping Crane Migratory Paths
@@ -54,7 +55,7 @@ data("World")
 bb_us <- bb("United States", projection = "eck4")
 
 tm_shape(World, bbox = bb_us) +
-  tm_polygons() + 
+  tm_polygons() +
   tm_shape(wind_turbines) +
   tm_dots()
 
@@ -84,7 +85,8 @@ tm_shape(wind_belt) +
 
 
 ```{r}
-ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
+ggplot(whooping_crane_corridors) + geom_sf() +
+  ggtitle("Whooping Crane Migration Corridor")
 
 tm_shape(wind_belt) +
   tm_polygons("state_name") +
@@ -115,7 +117,7 @@ Data found here: https://eerscmap.usgs.gov/uswtdb/data/
 Metadata: https://eerscmap.usgs.gov/uswtdb/assets/data/uswtdb_v1_2_20181001.xml
 
 ```{r}
-full_wind_csv = read_csv("uswtdbCSV/uswtdb_v1_2_20181001.csv")
+full_wind_csv <- read_csv("uswtdbCSV/uswtdb_v1_2_20181001.csv")
 full_wind_csv
 
 total_num_turbines <- nrow(full_wind_csv)
@@ -162,7 +164,8 @@ Next, I map the number of turbines per state using the Fifty States data. When u
 ```{r}
 data("fifty_states")
 state_abbs <- tibble(state = str_to_lower(state.name), abb = state.abb)
-full_turbines<- left_join(turbine_per_state, state_abbs, by = c("state" = "abb")) %>%
+full_turbines <- left_join(turbine_per_state,
+                           state_abbs, by = c("state" = "abb")) %>%
   rename(id = state) %>%
   rename(full_state = state.y) %>%
   rename(num_turbines = n)
@@ -172,7 +175,7 @@ ggplot(full_turbines, aes(map_id = full_state)) +
   expand_limits(x = fifty_states$long, y = fifty_states$lat) +
   coord_map() +
   scale_fill_viridis() +
-  scale_x_continuous(breaks = NULL) + 
+  scale_x_continuous(breaks = NULL) +
   scale_y_continuous(breaks = NULL) +
   labs(x = "", y = "")
 ```
@@ -213,7 +216,8 @@ Just want to look through api list for genus and species of birds and bats (not 
 ```{r}
 genus <- "Grus"
 species <- "americana"
-api_call <- paste0("http://api.iucnredlist.org/index/species/", genus, "-", species, ".json")
+api_call <- paste0("http://api.iucnredlist.org/index/species/",
+                   genus, "-", species, ".json")
 
 resp <- httr::GET(api_call)
 resp
@@ -242,49 +246,8 @@ out_test <- httr::content(resp_test, as = "text")
 df_us <- jsonlite::fromJSON(out_test)
 
 df_us_final <- plyr::ldply(df_us, data.frame)
-df_us_final %>%
-  dplyr::select(scientific = scientific_name) %>%
-  filter(!is.na(scientific))
-
 df_us_final
-
 ```
-
-Get all species so that can filter by birds within ...
-```{r}
-#api_calls <- purrr::map((0:10), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
-
-#resp2 <- purrr::map(api_calls[1:10], function(url){
-#  Sys.sleep(0.5)
-#  httr::GET(url)
-#})
-
-#out <- purrr::map(resp2, httr::content, as = "text")
-#df_page <- purrr::map(out, jsonlite::fromJSON)
-#df_page
-
-#all_df <- plyr::ldply(df_page, data.frame)
-#all_df
-```
-
-Filter by birds
-```{r}
-#df_birds <- all_df %>%
-#  filter(result.phylum_name == "CHORDATA") %>%
-#  filter(result.class_name == "AVES") %>%
-#  filter(result.order_name != "GALLIFORMES") %>% #landfowl
-#  filter(result.order_name != "STRUTHIONIFORMES") %>% #rheas
-#  filter(result.order_name != "ANSERIFORMES") %>% #waterfowl
-#  select(id = result.taxonid, class = result.class_name, order = result.order_name, family = result.family_name, genus = #result.genus_name, scientific = result.scientific_name)
-
-#df_birds
-
-```
-
-```{r}
-#inner_join(df_us_final, df_birds, by = order)
-```
-
 
 #TODO:
 
