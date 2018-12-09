@@ -10,6 +10,7 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 ```
 
 ## Set Up
+Fifty Stater: https://github.com/wmurphyrd/fiftystater
 ```{r include=FALSE}
 devtools::install_github("wmurphyrd/fiftystater")
 library(tidyverse)
@@ -59,24 +60,46 @@ tm_shape(World, bbox = bb_us) +
 
 
 ```{r}
+if (require(USAboundaries) && require(sf)) {
+  wind_belt <- us_states(states = c("Texas", "Wyoming",
+                                    "Kansas", "Montana",
+                                    "Nebraska", "Colorado",
+                                    "North Dakota", "New Mexico",
+                                    "South Dakota", "Iowa",
+                                    "Oklahoma", "Minnesota"),
+                         resolution = "high")
+   plot(st_geometry(wind_belt))
+}
+
+tm_shape(wind_belt) +
+  tm_polygons() +
+  tm_shape(wind_turbines) +
+  tm_dots()
+
+
+```
+
+
+```{r}
 ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
+
+tm_shape(wind_belt) +
+  tm_polygons("state_name") +
+  tm_shape(whooping_crane_corridors) +
+  tm_polygons()
+
 ```
 
 I then overlay the two maps onto a map of the United States.
 ```{r}
-land <- us_states()
-land
-
 tmap_mode(mode = "plot") #change mode to plot
 
-tm_shape(land) +
-  tm_polygons("state_name", legend.show = FALSE) +
+tm_shape(wind_belt) +
+  tm_polygons("state_name") +
   tm_shape(whooping_crane_corridors) +
   tm_polygons() +
   tm_shape(wind_turbines) +
-  tm_dots() +
-  tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5) +
-  tmap_options(max.categories = 52)
+  tm_dots()
   
 ```
 
@@ -91,7 +114,11 @@ Metadata: https://eerscmap.usgs.gov/uswtdb/assets/data/uswtdb_v1_2_20181001.xml
 ```{r}
 full_wind_csv = read_csv("uswtdbCSV/uswtdb_v1_2_20181001.csv")
 full_wind_csv
+
+total_num_turbines <- nrow(full_wind_csv)
+total_num_turbines
 ```
+*Our dataset looks at a total of 58,185 tubines.*
 
 Analysis - group by state, graph height (and get none NA vals), what heights
 
@@ -149,15 +176,51 @@ ggplot(full_turbines, aes(map_id = full_state)) +
 ```
 
 ## Filter wind turbines by height
+Whooping cranes fly during migration between 15 and 1800 meters above the ground. They usually fly around 500 m off the ground (Source: https://journeynorth.org/tm/crane/MigrationDay_BJohns.html).
+
 ```{r}
-turbines_by_height <- wind_csv %>% filter(rotor_swept_area != -9999.00)
+wind_belt_states <- c("Texas", "Wyoming",
+              "Kansas", "Montana",
+              "Nebraska", "Colorado",
+              "North Dakota", "New Mexico",
+              "South Dakota", "Iowa",
+              "Oklahoma", "Minnesota")
+
+wind_belt_abb <- c("TX", "NM", "WY", "KS",
+                   "NE", "ND", "SD", "CO",
+                   "IA", "MN", "OK")
+
+turbines_by_height <- wind_csv %>%
+  filter(rotor_swept_area != -9999.00) %>%
+  filter(total_height < 1800) %>% #top of rotor area
+  filter(is.element(state, wind_belt_abb)) %>%
+  mutate(bottom = total_height - rotor_dia) %>%
+  filter(bottom > 15) #botom of rotor area
+
+percent_dangerous <- nrow(turbines_by_height) / total_num_turbines
+percent_dangerous * 100
+
 ```
 
-
+*56 percent of turbines could potentially be dangerous for whooping crane populations based on their rotor height. Wind turbine siting is extremely important in order to limit the number of bird deaths, especially for species that are already endangered.*
 
 
 #Other bird populations?
 
+```{r}
+extinct <- read_csv("https://espm-157.github.io/extinction-module/extinct.csv")
+
+birds <- extinct %>%
+  filter(Class == "AVES")
+birds
+
+bats <- extinct %>%
+  filter(Class == "MAMMALIA") %>%
+  filter(Order == "CHIROPTERA")
+bats
+```
+
+Just want to look through api list for genus and species of birds and bats (not necessarily ones that are already extinct)
 ```{r}
 genus <- "Grus"
 species <- "americana"
@@ -175,17 +238,11 @@ df
 ```
 
 
-
-
 #TODO:
 
 Custom R functions
 Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct?
 Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues)
 Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton
-[DONE] Use of spatial vector data (sf package) and visualization of spatial data
 
-
-
-# TODO
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -5,6 +5,8 @@ Sarah Tang
 Set Up
 ------
 
+Fifty Stater: <https://github.com/wmurphyrd/fiftystater>
+
 Introduction
 ------------
 
@@ -86,58 +88,45 @@ tm_shape(World, bbox = bb_us) +
 ![](analysis_files/figure-markdown_github/unnamed-chunk-3-2.png)
 
 ``` r
-ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
+if (require(USAboundaries) && require(sf)) {
+  wind_belt <- us_states(states = c("Texas", "Wyoming",
+                                    "Kansas", "Montana",
+                                    "Nebraska", "Colorado",
+                                    "North Dakota", "New Mexico",
+                                    "South Dakota", "Iowa",
+                                    "Oklahoma", "Minnesota"),
+                         resolution = "high")
+   plot(st_geometry(wind_belt))
+}
 ```
 
 ![](analysis_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
-I then overlay the two maps onto a map of the United States.
-
 ``` r
-land <- us_states()
-land
+tm_shape(wind_belt) +
+  tm_polygons() +
+  tm_shape(wind_turbines) +
+  tm_dots()
 ```
 
-    ## Simple feature collection with 52 features and 12 fields
-    ## geometry type:  MULTIPOLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: -179.1743 ymin: 17.91377 xmax: 179.7739 ymax: 71.35256
-    ## epsg (SRID):    4326
-    ## proj4string:    +proj=longlat +datum=WGS84 +no_defs
-    ## First 10 features:
-    ##    statefp  statens    affgeoid geoid stusps                 name lsad
-    ## 1       23 01779787 0400000US23    23     ME                Maine   00
-    ## 2       15 01779782 0400000US15    15     HI               Hawaii   00
-    ## 3       04 01779777 0400000US04    04     AZ              Arizona   00
-    ## 4       05 00068085 0400000US05    05     AR             Arkansas   00
-    ## 5       10 01779781 0400000US10    10     DE             Delaware   00
-    ## 6       13 01705317 0400000US13    13     GA              Georgia   00
-    ## 7       27 00662849 0400000US27    27     MN            Minnesota   00
-    ## 8       02 01785533 0400000US02    02     AK               Alaska   00
-    ## 9       06 01779778 0400000US06    06     CA           California   00
-    ## 10      11 01702382 0400000US11    11     DC District of Columbia   00
-    ##           aland       awater           state_name state_abbr
-    ## 1  7.988522e+10  11748755195                Maine         ME
-    ## 2  1.663410e+10  11777698394               Hawaii         HI
-    ## 3  2.941986e+11   1027346486              Arizona         AZ
-    ## 4  1.347715e+11   2960191698             Arkansas         AR
-    ## 5  5.047195e+09   1398720828             Delaware         DE
-    ## 6  1.491698e+11   4741100880              Georgia         GA
-    ## 7  2.062323e+11  18929176411            Minnesota         MN
-    ## 8  1.477946e+12 245390495931               Alaska         AK
-    ## 9  4.035011e+11  20466718403           California         CA
-    ## 10 1.583650e+08     18633403 District of Columbia         DC
-    ##    jurisdiction_type                       geometry
-    ## 1              state MULTIPOLYGON (((-68.92401 4...
-    ## 2              state MULTIPOLYGON (((-156.0497 1...
-    ## 3              state MULTIPOLYGON (((-114.7997 3...
-    ## 4              state MULTIPOLYGON (((-94.61792 3...
-    ## 5              state MULTIPOLYGON (((-75.77379 3...
-    ## 6              state MULTIPOLYGON (((-85.60516 3...
-    ## 7              state MULTIPOLYGON (((-97.22904 4...
-    ## 8              state MULTIPOLYGON (((179.4813 51...
-    ## 9              state MULTIPOLYGON (((-118.594 33...
-    ## 10          district MULTIPOLYGON (((-77.11976 3...
+![](analysis_files/figure-markdown_github/unnamed-chunk-4-2.png)
+
+``` r
+ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
+```
+
+![](analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
+``` r
+tm_shape(wind_belt) +
+  tm_polygons("state_name") +
+  tm_shape(whooping_crane_corridors) +
+  tm_polygons()
+```
+
+![](analysis_files/figure-markdown_github/unnamed-chunk-5-2.png)
+
+I then overlay the two maps onto a map of the United States.
 
 ``` r
 tmap_mode(mode = "plot") #change mode to plot
@@ -146,17 +135,15 @@ tmap_mode(mode = "plot") #change mode to plot
     ## tmap mode set to plotting
 
 ``` r
-tm_shape(land) +
-  tm_polygons("state_name", legend.show = FALSE) +
+tm_shape(wind_belt) +
+  tm_polygons("state_name") +
   tm_shape(whooping_crane_corridors) +
   tm_polygons() +
   tm_shape(wind_turbines) +
-  tm_dots() +
-  tm_grid(projection = "longlat", labels.size = .5, n.x = 5, n.y = 5) +
-  tmap_options(max.categories = 52)
+  tm_dots()
 ```
 
-![](analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ### Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
 
@@ -215,6 +202,15 @@ full_wind_csv
     ## #   t_conf_loc <int>, t_img_date <chr>, t_img_srce <chr>, xlong <dbl>,
     ## #   ylat <dbl>
 
+``` r
+total_num_turbines <- nrow(full_wind_csv)
+total_num_turbines
+```
+
+    ## [1] 58185
+
+*Our dataset looks at a total of 58,185 tubines.*
+
 Analysis - group by state, graph height (and get none NA vals), what heights
 
 t\_hh refers to turbine hub height in m t\_rsa refers to turbine rotor swept area in square meters t\_ttlh refers to the height of the wind turbine from the ground to the tip of a vertically extended blade above the tower. (t\_ttlh = t\_hh + 1/2 rotor diameter) t\_conf\_atr referes to level of confidence in the turbine's attributes from low to high 1. no confidence: no information found 2. partial confidence: incomplete information or discrepancies found across data sources 3. full confidence: consistent information across multiple data sources
@@ -253,7 +249,6 @@ State analysis - number of turbines per states
 
 ``` r
 turbine_per_state <- wind_csv %>%
-  filter(rotor_swept_area != -9999.00) %>%
   filter(state != "GU") %>% #not real states: GU and PR
   filter(state != "PR") %>%
   count(state)
@@ -261,69 +256,32 @@ turbine_per_state <- wind_csv %>%
 turbine_per_state %>% arrange(desc(n))
 ```
 
-    ## # A tibble: 41 x 2
+    ## # A tibble: 43 x 2
     ##    state     n
     ##    <chr> <int>
-    ##  1 TX    12922
-    ##  2 CA     5717
-    ##  3 IA     4153
-    ##  4 OK     3715
-    ##  5 KS     2790
-    ##  6 IL     2568
-    ##  7 MN     2499
-    ##  8 CO     1987
+    ##  1 TX    13232
+    ##  2 CA     9037
+    ##  3 IA     4280
+    ##  4 OK     3821
+    ##  5 KS     2898
+    ##  6 IL     2602
+    ##  7 MN     2547
+    ##  8 CO     2278
     ##  9 OR     1868
-    ## 10 WA     1725
-    ## # ... with 31 more rows
+    ## 10 WA     1744
+    ## # ... with 33 more rows
+
+*From this analysis, we can see that Texas has the most turbines as wind generation there continues to grow. After Texas and California, the states with the next highest number of turbines are IA (Iowa), OK (Oklahoma) - right above Texas, and KS (Kansas). All of these states fall within the wind belt.*
 
 ``` r
-#attempt working with states
 data("fifty_states")
-
 #fifty_states states written lower case and spelled out
 state_abbs <- tibble(state = str_to_lower(state.name), abb = state.abb)
-state_abbs
-```
-
-    ## # A tibble: 50 x 2
-    ##    state       abb  
-    ##    <chr>       <chr>
-    ##  1 alabama     AL   
-    ##  2 alaska      AK   
-    ##  3 arizona     AZ   
-    ##  4 arkansas    AR   
-    ##  5 california  CA   
-    ##  6 colorado    CO   
-    ##  7 connecticut CT   
-    ##  8 delaware    DE   
-    ##  9 florida     FL   
-    ## 10 georgia     GA   
-    ## # ... with 40 more rows
-
-``` r
 full_turbines<- left_join(turbine_per_state, state_abbs, by = c("state" = "abb")) %>%
   rename(id = state) %>%
   rename(full_state = state.y) %>%
   rename(num_turbines = n)
-full_turbines
-```
 
-    ## # A tibble: 41 x 3
-    ##    id    num_turbines full_state 
-    ##    <chr>        <int> <chr>      
-    ##  1 AK             121 alaska     
-    ##  2 AZ             144 arizona    
-    ##  3 CA            5717 california 
-    ##  4 CO            1987 colorado   
-    ##  5 CT               2 connecticut
-    ##  6 DE               1 delaware   
-    ##  7 HI             119 hawaii     
-    ##  8 IA            4153 iowa       
-    ##  9 ID             541 idaho      
-    ## 10 IL            2568 illinois   
-    ## # ... with 31 more rows
-
-``` r
 ggplot(full_turbines, aes(map_id = full_state)) +
   geom_map(aes(fill = num_turbines), map = fifty_states) +
   expand_limits(x = fifty_states$long, y = fifty_states$lat) +
@@ -334,10 +292,108 @@ ggplot(full_turbines, aes(map_id = full_state)) +
   labs(x = "", y = "")
 ```
 
-![](analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
+
+Filter wind turbines by height
+------------------------------
+
+Whooping cranes fly during migration between 15 and 1800 meters above the ground. They usually fly around 500 m off the ground (Source: <https://journeynorth.org/tm/crane/MigrationDay_BJohns.html>).
+
+``` r
+wind_belt_states <- c("Texas", "Wyoming",
+              "Kansas", "Montana",
+              "Nebraska", "Colorado",
+              "North Dakota", "New Mexico",
+              "South Dakota", "Iowa",
+              "Oklahoma", "Minnesota")
+
+wind_belt_abb <- c("TX", "NM", "WY", "KS",
+                   "NE", "ND", "SD", "CO",
+                   "IA", "MN", "OK")
+
+turbines_by_height <- wind_csv %>%
+  filter(rotor_swept_area != -9999.00) %>%
+  filter(total_height < 1800) %>% #top of rotor area
+  filter(is.element(state, wind_belt_abb)) %>%
+  mutate(bottom = total_height - rotor_dia) %>%
+  filter(bottom > 15) #botom of rotor area
+
+percent_dangerous <- nrow(turbines_by_height) / total_num_turbines
+percent_dangerous * 100
+```
+
+    ## [1] 56.48363
+
+*56 percent of turbines could potentially be dangerous for whooping crane populations based on their rotor height. Wind turbine siting is extremely important in order to limit the number of bird deaths, especially for species that are already endangered.*
 
 Other bird populations?
 =======================
+
+``` r
+extinct <- read_csv("https://espm-157.github.io/extinction-module/extinct.csv")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   .default = col_character(),
+    ##   `Species ID` = col_integer(),
+    ##   `Red List criteria version` = col_double(),
+    ##   `Year assessed` = col_integer()
+    ## )
+
+    ## See spec(...) for full column specifications.
+
+``` r
+birds <- extinct %>%
+  filter(Class == "AVES")
+birds
+```
+
+    ## # A tibble: 140 x 23
+    ##    `Species ID` Kingdom Phylum Class Order Family Genus Species Authority
+    ##           <int> <chr>   <chr>  <chr> <chr> <chr>  <chr> <chr>   <chr>    
+    ##  1     62184893 ANIMAL… CHORD… AVES  STRI… STRIG… Aego… gradyi  Olson, 2…
+    ##  2     22691601 ANIMAL… CHORD… AVES  COLU… COLUM… Alec… nitidi… (Scopoli…
+    ##  3     62759683 ANIMAL… CHORD… AVES  COLU… COLUM… Alec… payand… Hume, 20…
+    ##  4     22691052 ANIMAL… CHORD… AVES  COLU… COLUM… Alop… ferrug… (Forster…
+    ##  5     22691056 ANIMAL… CHORD… AVES  COLU… COLUM… Alop… salamo… (Ramsay,…
+    ##  6     22729490 ANIMAL… CHORD… AVES  ANSE… ANATI… Alop… kervaz… (Cowles,…
+    ##  7     22728658 ANIMAL… CHORD… AVES  ANSE… ANATI… Alop… maurit… (Newton …
+    ##  8     22728705 ANIMAL… CHORD… AVES  PSIT… PSITT… Amaz… martin… A. H. Cl…
+    ##  9     22728701 ANIMAL… CHORD… AVES  PSIT… PSITT… Amaz… violac… (J. F. G…
+    ## 10     22728666 ANIMAL… CHORD… AVES  ANSE… ANATI… Anas  marecu… Olson & …
+    ## # ... with 130 more rows, and 14 more variables: `Infraspecific
+    ## #   rank` <chr>, `Infraspecific name` <chr>, `Infraspecific
+    ## #   authority` <chr>, `Stock/subpopulation` <chr>, Synonyms <chr>, `Common
+    ## #   names (Eng)` <chr>, `Common names (Fre)` <chr>, `Common names
+    ## #   (Spa)` <chr>, `Red List status` <chr>, `Red List criteria` <chr>, `Red
+    ## #   List criteria version` <dbl>, `Year assessed` <int>, `Population
+    ## #   trend` <chr>, Petitioned <chr>
+
+``` r
+bats <- extinct %>%
+  filter(Class == "MAMMALIA") %>%
+  filter(Order == "CHIROPTERA")
+bats
+```
+
+    ## # A tibble: 5 x 23
+    ##   `Species ID` Kingdom Phylum Class Order Family Genus Species Authority
+    ##          <int> <chr>   <chr>  <chr> <chr> <chr>  <chr> <chr>   <chr>    
+    ## 1       136451 ANIMAL… CHORD… MAMM… CHIR… PHYLL… Desm… dracul… Morgan, …
+    ## 2        18718 ANIMAL… CHORD… MAMM… CHIR… PTERO… Pter… brunne… Dobson, …
+    ## 3        18749 ANIMAL… CHORD… MAMM… CHIR… PTERO… Pter… pilosus K. Ander…
+    ## 4        18761 ANIMAL… CHORD… MAMM… CHIR… PTERO… Pter… subnig… (Kerr, 1…
+    ## 5        18763 ANIMAL… CHORD… MAMM… CHIR… PTERO… Pter… tokudae Tate, 19…
+    ## # ... with 14 more variables: `Infraspecific rank` <chr>, `Infraspecific
+    ## #   name` <chr>, `Infraspecific authority` <chr>,
+    ## #   `Stock/subpopulation` <chr>, Synonyms <chr>, `Common names
+    ## #   (Eng)` <chr>, `Common names (Fre)` <chr>, `Common names (Spa)` <chr>,
+    ## #   `Red List status` <chr>, `Red List criteria` <chr>, `Red List criteria
+    ## #   version` <dbl>, `Year assessed` <int>, `Population trend` <chr>,
+    ## #   Petitioned <chr>
+
+Just want to look through api list for genus and species of birds and bats (not necessarily ones that are already extinct)
 
 ``` r
 genus <- "Grus"
@@ -349,7 +405,7 @@ resp
 ```
 
     ## Response [http://api.iucnredlist.org/index/species/Grus-americana.json]
-    ##   Date: 2018-12-09 05:46
+    ##   Date: 2018-12-09 09:00
     ##   Status: 200
     ##   Content-Type: application/json; charset=utf-8
     ##   Size: 1.02 kB
@@ -381,7 +437,7 @@ df
 TODO:
 =====
 
-Custom R functions Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct? Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues) Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton \[DONE\] Use of spatial vector data (sf package) and visualization of spatial data
+Custom R functions Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct? Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues) Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton
 
 TODO
 ====

@@ -7,6 +7,8 @@
 
 ## assignment
 
+In this module, I use and analyze spatial vector data as well as visualize the spatial data.
+
 All work for this assignment is in the `analysis` directory.
 
 ## Special files
