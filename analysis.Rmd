@@ -13,18 +13,20 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 Fifty Stater: https://github.com/wmurphyrd/fiftystater
 ```{r include=FALSE}
 devtools::install_github("wmurphyrd/fiftystater")
+devtools::install_github("ropensci/USAboundariesData")
 library(tidyverse)
 library(ggplot2)
 library(sf)
 library(tmap)
 library(tmaptools)
 library(USAboundaries)
-#library(USAboundariesData)
 library(httr)
 library(jsonlite)
 library(viridis)
-library(fiftystater)
 library(mapproj)
+
+library(fiftystater)
+library(USAboundariesData)
 
 ```
 
