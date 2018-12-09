@@ -12,8 +12,9 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 ## Set Up
 Fifty Stater: https://github.com/wmurphyrd/fiftystater
 USAboundaries: https://lincolnmullen.com/software/usaboundaries/
+I load in libraries to make API calls, use data visualization packages, and overlay visuals with maps.
 
-```{r include=FALSE}
+```{r include=FALSE, echo=FALSE}
 devtools::install_github("wmurphyrd/fiftystater")
 
 library(tidyverse)
@@ -29,8 +30,7 @@ library(viridis)
 library(mapproj)
 library(magrittr)
 library(fiftystater)
-
-
+library(purrr)
 ```
 
 ## Introduction
@@ -40,6 +40,7 @@ Whooping crane corridor - https://www.sciencebase.gov/catalog/item/5a314a72e4b08
 Whooping crane - https://www.arcgis.com/home/item.html?id=7d27571bc3454a1c91edf665c67b9c3e
 
 ## Loading in files
+Data access
 ```{r echo=FALSE}
 wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet = TRUE)
 whooping_crane_corridors <-
@@ -47,9 +48,10 @@ whooping_crane_corridors <-
 ```
 
 # Mapping Wind Turbines and Whooping Crane Migratory Paths
-Next, I plot the maps of the location of wind turbines and whooping crane patterns using the `tm_shape` command.
+Next, I plot the maps of the location of wind turbines and whooping crane patterns using the `tm_shape` command. Data preparation and initial data visualization.
 ```{r}
-tm_shape(wind_turbines) + tm_dots()
+tm_shape(wind_turbines) +
+  tm_dots()
 
 data("World")
 bb_us <- bb("United States", projection = "eck4")
@@ -57,7 +59,8 @@ bb_us <- bb("United States", projection = "eck4")
 tm_shape(World, bbox = bb_us) +
   tm_polygons() +
   tm_shape(wind_turbines) +
-  tm_dots()
+  tm_dots() + 
+  labs(title = "Locations of Wind Turbines in the US")
 
 ```
 
@@ -91,7 +94,8 @@ ggplot(whooping_crane_corridors) + geom_sf() +
 tm_shape(wind_belt) +
   tm_polygons("state_name") +
   tm_shape(whooping_crane_corridors) +
-  tm_polygons()
+  tm_polygons() +
+  labs(title = "Whooping Crane Migration Corridor through the US")
 
 ```
 
@@ -104,7 +108,8 @@ tm_shape(wind_belt) +
   tm_shape(whooping_crane_corridors) +
   tm_polygons() +
   tm_shape(wind_turbines) +
-  tm_dots()
+  tm_dots() +
+  labs(title = "Whooping Crane Migration Corridor vs. Wind Turbines Location")
   
 ```
 
@@ -177,7 +182,7 @@ ggplot(full_turbines, aes(map_id = full_state)) +
   scale_fill_viridis() +
   scale_x_continuous(breaks = NULL) +
   scale_y_continuous(breaks = NULL) +
-  labs(x = "", y = "")
+  labs(title = "Number of Turbines per state in the US", x = "", y = "")
 ```
 
 ## Filter wind turbines by height
@@ -234,7 +239,8 @@ Working with API and token
 
 All species
 
-Gettings all the speices within the United States
+Gettings all the species within the United States.
+Interaction with an api
 ```{r}
 token <- ("9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")
 token
@@ -246,14 +252,82 @@ out_test <- httr::content(resp_test, as = "text")
 df_us <- jsonlite::fromJSON(out_test)
 
 df_us_final <- plyr::ldply(df_us, data.frame)
-df_us_final
+df_us_final %>%
+  select(taxonid, scientific_name, category) %>%
+  filter(!is.na(scientific_name))
 ```
 
-#TODO:
+Getting all 10 pages of species so that I can match them up with the species found within the United States
+```{r}
+api_calls <- purrr::map((0:10), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
 
-Custom R functions
-Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct?
-Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues)
-Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton
+resp2 <- purrr::map(api_calls[1:10], function(url){
+  Sys.sleep(0.5)
+  httr::GET(url)
+})
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+out <- purrr::map(resp2, httr::content, as = "text")
+df_page <- purrr::map(out, jsonlite::fromJSON)
+df_page
+
+all_df <- plyr::ldply(df_page, data.frame)
+all_df <- all_df %>%
+  mutate(scientific_name = result.scientific_name)
+all_df
+```
+
+Combine all species with the US species
+Use of regular expressions to extract the species from the scientific name
+```{r}
+us_all <- left_join(df_us_final, all_df, by = "scientific_name")
+
+us_birds <- us_all %>%
+  filter(!is.na(scientific_name)) %>%
+  filter(result.class_name == "AVES") %>%
+  select(scientific_name, class = result.class_name,
+         order = result.order_name,
+         genus = result.genus_name, category) %>%
+  mutate(species = stringr::str_extract(scientific_name, "(\\s+\\S+)"))
+us_birds
+```
+
+Getting rationale for each
+Custom R function to create an api call given the genus and species so that I can get the rationale for each bird within the United States
+
+```{r}
+
+api_call_threats <- paste0("http://apiv3.iucnredlist.org/api/v3/threats/species/name/", genus, "%20", species, "?token=", token)
+api_call_threats
+
+api_threat <- function(genus, species) {
+  api_call_threats <- paste0("http://apiv3.iucnredlist.org/api/v3/threats/species/name/", 
+                             genus, "%20", species, "?token=", token)
+  response <- httr::GET(api_call_threats)
+  status <- httr::status_code(response)
+  out <- httr::content(response, as = "text")
+  df <- jsonlite::fromJSON(out)
+  df
+}
+
+df_bird_threats <- map2_dfr(us_birds$genus[1:5], us_birds$species[1:5], api_threat)
+df_bird_threats
+
+
+api_fn <- function(genus, species) {
+  api_call <- paste0("http://api.iucnredlist.org/index/species/", genus, "-", species, ".json")
+  Sys.sleep(0.5)
+  
+  out <- httr::content(resp, as = "text")
+  df <- jsonlite::fromJSON(out)
+  rationale <- df$rationale
+  
+  data_frame(Genus = genus, Species = species, API = api_call, rationale = rationale, status_code = status)
+}
+
+df_all_birds_us <- map2_dfr(us_birds$genus[1:2], us_birds$species[1:2], api_fn)
+df_all_birds_us
+```
+
+Instead of doing the above, I can extract threats for each species and parse through those?
+
+Overall, the next steps are to further examine how positioning and siting can alter migration patterns of whooping cranes as well as the other bird species listed above.
