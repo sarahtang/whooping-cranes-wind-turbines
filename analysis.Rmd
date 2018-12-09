@@ -19,7 +19,7 @@ library(sf)
 library(tmap)
 library(tmaptools)
 library(USAboundaries)
-library(USAboundariesData)
+#library(USAboundariesData)
 library(httr)
 library(jsonlite)
 library(viridis)
@@ -207,19 +207,6 @@ percent_dangerous * 100
 
 
 #Other bird populations?
-
-```{r}
-extinct <- read_csv("https://espm-157.github.io/extinction-module/extinct.csv")
-
-birds <- extinct %>%
-  filter(Class == "AVES")
-birds
-
-bats <- extinct %>%
-  filter(Class == "MAMMALIA") %>%
-  filter(Order == "CHIROPTERA")
-bats
-```
 
 Just want to look through api list for genus and species of birds and bats (not necessarily ones that are already extinct)
 ```{r}

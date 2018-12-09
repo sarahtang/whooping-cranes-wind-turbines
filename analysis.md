@@ -329,70 +329,6 @@ percent_dangerous * 100
 Other bird populations?
 =======================
 
-``` r
-extinct <- read_csv("https://espm-157.github.io/extinction-module/extinct.csv")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   .default = col_character(),
-    ##   `Species ID` = col_integer(),
-    ##   `Red List criteria version` = col_double(),
-    ##   `Year assessed` = col_integer()
-    ## )
-
-    ## See spec(...) for full column specifications.
-
-``` r
-birds <- extinct %>%
-  filter(Class == "AVES")
-birds
-```
-
-    ## # A tibble: 140 x 23
-    ##    `Species ID` Kingdom Phylum Class Order Family Genus Species Authority
-    ##           <int> <chr>   <chr>  <chr> <chr> <chr>  <chr> <chr>   <chr>    
-    ##  1     62184893 ANIMAL… CHORD… AVES  STRI… STRIG… Aego… gradyi  Olson, 2…
-    ##  2     22691601 ANIMAL… CHORD… AVES  COLU… COLUM… Alec… nitidi… (Scopoli…
-    ##  3     62759683 ANIMAL… CHORD… AVES  COLU… COLUM… Alec… payand… Hume, 20…
-    ##  4     22691052 ANIMAL… CHORD… AVES  COLU… COLUM… Alop… ferrug… (Forster…
-    ##  5     22691056 ANIMAL… CHORD… AVES  COLU… COLUM… Alop… salamo… (Ramsay,…
-    ##  6     22729490 ANIMAL… CHORD… AVES  ANSE… ANATI… Alop… kervaz… (Cowles,…
-    ##  7     22728658 ANIMAL… CHORD… AVES  ANSE… ANATI… Alop… maurit… (Newton …
-    ##  8     22728705 ANIMAL… CHORD… AVES  PSIT… PSITT… Amaz… martin… A. H. Cl…
-    ##  9     22728701 ANIMAL… CHORD… AVES  PSIT… PSITT… Amaz… violac… (J. F. G…
-    ## 10     22728666 ANIMAL… CHORD… AVES  ANSE… ANATI… Anas  marecu… Olson & …
-    ## # ... with 130 more rows, and 14 more variables: `Infraspecific
-    ## #   rank` <chr>, `Infraspecific name` <chr>, `Infraspecific
-    ## #   authority` <chr>, `Stock/subpopulation` <chr>, Synonyms <chr>, `Common
-    ## #   names (Eng)` <chr>, `Common names (Fre)` <chr>, `Common names
-    ## #   (Spa)` <chr>, `Red List status` <chr>, `Red List criteria` <chr>, `Red
-    ## #   List criteria version` <dbl>, `Year assessed` <int>, `Population
-    ## #   trend` <chr>, Petitioned <chr>
-
-``` r
-bats <- extinct %>%
-  filter(Class == "MAMMALIA") %>%
-  filter(Order == "CHIROPTERA")
-bats
-```
-
-    ## # A tibble: 5 x 23
-    ##   `Species ID` Kingdom Phylum Class Order Family Genus Species Authority
-    ##          <int> <chr>   <chr>  <chr> <chr> <chr>  <chr> <chr>   <chr>    
-    ## 1       136451 ANIMAL… CHORD… MAMM… CHIR… PHYLL… Desm… dracul… Morgan, …
-    ## 2        18718 ANIMAL… CHORD… MAMM… CHIR… PTERO… Pter… brunne… Dobson, …
-    ## 3        18749 ANIMAL… CHORD… MAMM… CHIR… PTERO… Pter… pilosus K. Ander…
-    ## 4        18761 ANIMAL… CHORD… MAMM… CHIR… PTERO… Pter… subnig… (Kerr, 1…
-    ## 5        18763 ANIMAL… CHORD… MAMM… CHIR… PTERO… Pter… tokudae Tate, 19…
-    ## # ... with 14 more variables: `Infraspecific rank` <chr>, `Infraspecific
-    ## #   name` <chr>, `Infraspecific authority` <chr>,
-    ## #   `Stock/subpopulation` <chr>, Synonyms <chr>, `Common names
-    ## #   (Eng)` <chr>, `Common names (Fre)` <chr>, `Common names (Spa)` <chr>,
-    ## #   `Red List status` <chr>, `Red List criteria` <chr>, `Red List criteria
-    ## #   version` <dbl>, `Year assessed` <int>, `Population trend` <chr>,
-    ## #   Petitioned <chr>
-
 Just want to look through api list for genus and species of birds and bats (not necessarily ones that are already extinct)
 
 ``` r
@@ -405,7 +341,7 @@ resp
 ```
 
     ## Response [http://api.iucnredlist.org/index/species/Grus-americana.json]
-    ##   Date: 2018-12-09 09:00
+    ##   Date: 2018-12-09 09:24
     ##   Status: 200
     ##   Content-Type: application/json; charset=utf-8
     ##   Size: 1.02 kB
@@ -438,8 +374,5 @@ TODO:
 =====
 
 Custom R functions Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct? Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues) Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton
-
-TODO
-====
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

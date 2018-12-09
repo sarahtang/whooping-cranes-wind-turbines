@@ -7,7 +7,7 @@
 
 ## assignment
 
-In this module, I use and analyze spatial vector data as well as visualize the spatial data.
+In this module, I use and analyze spatial vector data as well as visualize the spatial data. I also use more than 5 dplyr verbs.
 
 All work for this assignment is in the `analysis` directory.
 
