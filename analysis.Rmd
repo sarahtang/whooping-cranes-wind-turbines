@@ -13,7 +13,7 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 Fifty Stater: https://github.com/wmurphyrd/fiftystater
 ```{r include=FALSE}
 devtools::install_github("wmurphyrd/fiftystater")
-devtools::install_github("ropensci/USAboundariesData")
+#devtools::install_github("ropensci/USAboundariesData")
 library(tidyverse)
 library(ggplot2)
 library(sf)
@@ -26,7 +26,8 @@ library(viridis)
 library(mapproj)
 
 library(fiftystater)
-library(USAboundariesData)
+
+#library(USAboundariesData)
 
 ```
 
@@ -225,6 +226,13 @@ out <- content(resp, as = "text")
 df <- jsonlite::fromJSON(out)
 rationale <- df$rationale
 df
+```
+
+Working with API and token
+```{r}
+token <- "9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee"
+
+GET("http://apiv3.iucnredlist.org/api/v3/species/page/0?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")
 ```
 
 
