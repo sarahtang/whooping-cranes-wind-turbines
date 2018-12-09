@@ -26,7 +26,7 @@ library(httr)
 library(jsonlite)
 library(viridis)
 library(mapproj)
-
+library(magrittr)
 library(fiftystater)
 
 
@@ -218,12 +218,12 @@ genus <- "Grus"
 species <- "americana"
 api_call <- paste0("http://api.iucnredlist.org/index/species/", genus, "-", species, ".json")
 
-resp <- GET(api_call)
+resp <- httr::GET(api_call)
 resp
 
 status <- httr::status_code(resp)
 
-out <- content(resp, as = "text")
+out <- httr::content(resp, as = "text")
 df <- jsonlite::fromJSON(out)
 rationale <- df$rationale
 df
@@ -233,15 +233,50 @@ Working with API and token
 
 All species
 
+Gettings all the speices within the United States
 ```{r}
-#token <- ("9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")
-#website <- ("http://apiv3.iucnredlist.org/api/v3/")
+token <- ("9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")
+token
+website <- ("http://apiv3.iucnredlist.org/api/v3/")
+website
 
-#resp_test <- GET(paste0(website, "country/getspecies/US?token=", token))
-#out_test <- content(resp_test, as = "text")
-#df_test <- jsonlite::fromJSON(out_test)
-#df_test
+resp_test <- httr::GET(paste0(website, "country/getspecies/US?token=", token))
+out_test <- httr::content(resp_test, as = "text")
+df_test <- jsonlite::fromJSON(out_test)
+df_test
 
+```
+Get all species so that can filter by birds and bats
+```{r}
+api_calls <- purrr::map((0:10), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
+
+resp2 <- purrr::map(api_calls[1:10], function(url){
+  Sys.sleep(0.5)
+  httr::GET(url)
+})
+
+out <- purrr::map(resp2, httr::content, as = "text")
+df_page <- purrr::map(out, jsonlite::fromJSON)
+df_page
+
+all_df <- plyr::ldply(df_page, data.frame)
+all_df
+```
+
+Filter by birds
+```{r}
+all_df %>%
+  filter(result.phylum_name == "CHORDATA") %>%
+  filter(result.class_name == "AVES") %>%
+  filter(result.order_name != "GALLIFORMES") %>% #landfowl
+  filter(result.order_name != "STRUTHIONIFORMES") %>% #rheas
+  filter(result.order_name != "ANSERIFORMES") %>% #waterfowl
+  select(id = result.taxonid, class = result.class_name, order = result.order_name, family = result.family_name, genus = result.genus_name, scientific = result.scientific_name)
+```
+Filter by bats
+```{r}
+all_df %>%
+  filter(result.order_name == "CHIROPTERA")
 ```
 
 
