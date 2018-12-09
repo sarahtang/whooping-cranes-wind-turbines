@@ -39,14 +39,10 @@ This module aims to examine and better understand how wind turbine development i
 Whooping crane corridor - https://www.sciencebase.gov/catalog/item/5a314a72e4b08e6a89d707e0
 Whooping crane - https://www.arcgis.com/home/item.html?id=7d27571bc3454a1c91edf665c67b9c3e
 
-
 ## Loading in files
-```{r}
+```{r echo=FALSE}
 wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet=TRUE)
 whooping_crane_corridors <- st_read("WHCR_corridors/WHCR_corridors.shp", quiet=TRUE)
-
-wind_turbines
-whooping_crane_corridors
 ```
 
 # Mapping Wind Turbines and Whooping Crane Migratory Paths
@@ -66,16 +62,17 @@ tm_shape(World, bbox = bb_us) +
 
 
 ```{r}
-#if (require(USAboundaries) && require(sf)) {
-  wind_belt <- us_states(states = c("Texas", "Wyoming",
-                                    "Kansas", "Montana",
-                                    "Nebraska", "Colorado",
-                                    "North Dakota", "New Mexico",
-                                    "South Dakota", "Iowa",
-                                    "Oklahoma", "Minnesota"),
-                         resolution = "high")
-   plot(st_geometry(wind_belt))
-#}
+devtools::install_github("ropensci/USAboundariesData")
+USAboundaries::install_data_package
+
+wind_belt <- USAboundariesData::us_states(states = c("Texas", "Wyoming",
+                                  "Kansas", "Montana",
+                                  "Nebraska", "Colorado",
+                                  "North Dakota", "New Mexico",
+                                  "South Dakota", "Iowa",
+                                  "Oklahoma", "Minnesota"),
+                       resolution = "high")
+ plot(st_geometry(wind_belt))
 
 tm_shape(wind_belt) +
   tm_polygons() +
@@ -161,10 +158,9 @@ turbine_per_state %>% arrange(desc(n))
 ```
 *From this analysis, we can see that Texas has the most turbines as wind generation there continues to grow. After Texas and California, the states with the next highest number of turbines are IA (Iowa), OK (Oklahoma) - right above Texas, and KS (Kansas). All of these states fall within the wind belt.*
 
-
+Next, I map the number of turbines per state using the Fifty States data. When using this data, the states are written lowercase and spelled out, not in abbreviations. As a result, it is important to convert each state id so that it correlates with the map.
 ```{r}
 data("fifty_states")
-#fifty_states states written lower case and spelled out
 state_abbs <- tibble(state = str_to_lower(state.name), abb = state.abb)
 full_turbines<- left_join(turbine_per_state, state_abbs, by = c("state" = "abb")) %>%
   rename(id = state) %>%
@@ -254,7 +250,7 @@ df_us_final
 
 ```
 
-Get all species so that can filter by birds and bats
+Get all species so that can filter by birds within ...
 ```{r}
 #api_calls <- purrr::map((0:10), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
 
@@ -283,11 +279,6 @@ Filter by birds
 
 #df_birds
 
-```
-Filter by bats
-```{r}
-#all_df %>%
-#  filter(result.order_name == "CHIROPTERA")
 ```
 
 ```{r}
