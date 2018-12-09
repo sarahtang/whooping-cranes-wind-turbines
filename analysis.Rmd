@@ -149,6 +149,9 @@ ggplot(full_turbines, aes(map_id = full_state)) +
 ```
 
 ## Filter wind turbines by height
+```{r}
+turbines_by_height <- wind_csv %>% filter(rotor_swept_area != -9999.00)
+```
 
 
 
