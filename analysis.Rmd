@@ -92,10 +92,9 @@ ggplot(whooping_crane_corridors) + geom_sf() +
   ggtitle("Whooping Crane Migration Corridor")
 
 tm_shape(wind_belt) +
-  tm_polygons("state_name") +
+  tm_polygons("state_name", title = "Whooping Crane Migration Corridor through the US") +
   tm_shape(whooping_crane_corridors) +
-  tm_polygons() +
-  labs(title = "Whooping Crane Migration Corridor through the US")
+  tm_polygons()
 
 ```
 
@@ -104,12 +103,12 @@ I then overlay the two maps onto a map of the United States.
 tmap_mode(mode = "plot") #change mode to plot
 
 tm_shape(wind_belt) +
-  tm_polygons("state_name") +
+  tm_polygons("state_name", legend.title = "State", 
+              title = "Whooping Cranes & Wind Turbines Location") +
   tm_shape(whooping_crane_corridors) +
   tm_polygons() +
   tm_shape(wind_turbines) +
-  tm_dots() +
-  labs(title = "Whooping Crane Migration Corridor vs. Wind Turbines Location")
+  tm_dots()
   
 ```
 
@@ -241,7 +240,7 @@ All species
 
 Gettings all the species within the United States.
 Interaction with an api
-```{r}
+```{r echo=FALSE}
 token <- ("9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")
 token
 website <- ("http://apiv3.iucnredlist.org/api/v3/")
@@ -252,25 +251,24 @@ out_test <- httr::content(resp_test, as = "text")
 df_us <- jsonlite::fromJSON(out_test)
 
 df_us_final <- plyr::ldply(df_us, data.frame)
-df_us_final %>%
+df_us_final <- df_us_final %>%
   #select(taxonid, scientific_name, category) %>%
   filter(!is.na(scientific_name))
 ```
 
 Getting all 10 pages of species so that I can match them up with the species found within the United States
 ```{r}
-api_calls <- purrr::map((0:10), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
+api_calls <- purrr::map((7:9), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
 
-resp2 <- purrr::map(api_calls[1:10], function(url){
-  Sys.sleep(0.5)
+resp2 <- purrr::map(api_calls[1:3], function(url){
+  #Sys.sleep(0.5)
   httr::GET(url)
 })
 
 out <- purrr::map(resp2, httr::content, as = "text")
 df_page <- purrr::map(out, jsonlite::fromJSON)
-df_page
-
 all_df <- plyr::ldply(df_page, data.frame)
+
 all_df <- all_df %>%
   mutate(scientific_name = result.scientific_name)
 all_df
@@ -284,7 +282,7 @@ us_all <- left_join(df_us_final, all_df, by = "scientific_name")
 us_birds <- us_all %>%
   filter(!is.na(scientific_name)) %>%
   filter(result.class_name == "AVES") %>%
-  select(scientific_name, class = result.class_name,
+  dplyr::select(scientific_name, class = result.class_name,
          order = result.order_name,
          genus = result.genus_name, category) %>%
   mutate(species = stringr::str_extract(scientific_name, "(\\s+\\S+)"))
@@ -299,18 +297,20 @@ api_call_threats <- paste0("http://apiv3.iucnredlist.org/api/v3/threats/species/
 api_call_threats
 
 api_threat <- function(genus, species) {
+  genus <- "Grus"
+  species <- "americana"
   api_call_threats <- paste0("http://apiv3.iucnredlist.org/api/v3/threats/species/name/", 
                              genus, "%20", species, "?token=", token)
   response <- httr::GET(api_call_threats)
   status <- httr::status_code(response)
   out <- httr::content(response, as = "text")
-  df <- jsonlite::fromJSON(out)
-  
-  data_frame(Genus = genus, Species = species, API = api_call, rationale = rationale, status_code = status)
+  df_threat <- jsonlite::fromJSON(out)
+  data_frame(Genus =)
+  #data_frame(Genus = genus, Species = species, API = api_call_threats, status_code = status, type = title, timing = timing, scope = scope, severity = severity, score = score)
 }
 
-df_bird_threats <- map2_dfr(us_birds$genus[1:5], us_birds$species[1:5], api_threat)
-df_bird_threats
+#df_bird_threats <- map2_dfr(us_birds$genus[1:5], us_birds$species[1:5], api_threat)
+#df_bird_threats
 ```
 
 Instead of doing the above, I can extract threats for each species and parse through those?
