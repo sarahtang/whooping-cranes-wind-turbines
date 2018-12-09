@@ -65,7 +65,7 @@ tm_shape(World, bbox = bb_us) +
 devtools::install_github("ropensci/USAboundariesData")
 USAboundaries::install_data_package
 
-wind_belt <- USAboundariesData::us_states(states = c("Texas", "Wyoming",
+wind_belt <- USAboundaries::us_states(states = c("Texas", "Wyoming",
                                   "Kansas", "Montana",
                                   "Nebraska", "Colorado",
                                   "North Dakota", "New Mexico",

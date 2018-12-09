@@ -17,53 +17,6 @@ Whooping crane corridor - <https://www.sciencebase.gov/catalog/item/5a314a72e4b0
 Loading in files
 ----------------
 
-``` r
-wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet=TRUE)
-whooping_crane_corridors <- st_read("WHCR_corridors/WHCR_corridors.shp", quiet=TRUE)
-
-wind_turbines
-```
-
-    ## Simple feature collection with 58185 features and 0 fields
-    ## geometry type:  POINT
-    ## dimension:      XY
-    ## bbox:           xmin: -171.7131 ymin: 13.38938 xmax: 144.7227 ymax: 66.8399
-    ## epsg (SRID):    4269
-    ## proj4string:    +proj=longlat +datum=NAD83 +no_defs
-    ## First 10 features:
-    ##                      geometry
-    ## 1  POINT (-102.0486 33.60797)
-    ## 2  POINT (-102.0495 33.60793)
-    ## 3  POINT (-102.0486 33.60919)
-    ## 4  POINT (-98.26075 35.39525)
-    ## 5     POINT (-98.2576 35.367)
-    ## 6  POINT (-98.75173 43.70377)
-    ## 7  POINT (-98.24736 35.39624)
-    ## 8  POINT (-98.26535 35.37489)
-    ## 9  POINT (-98.25227 35.39637)
-    ## 10 POINT (-98.22907 35.35834)
-
-``` r
-whooping_crane_corridors
-```
-
-    ## Simple feature collection with 9 features and 3 fields
-    ## geometry type:  POLYGON
-    ## dimension:      XY
-    ## bbox:           xmin: -1197376 ymin: -1322000 xmax: 32657.37 ymax: 2278000
-    ## epsg (SRID):    NA
-    ## proj4string:    +proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs
-    ##   Id Corridor CL                       geometry
-    ## 1  0       95 NA POLYGON ((16808.16 -1322000...
-    ## 2  0       75 NA POLYGON ((-31086.76 -132200...
-    ## 3  0       50 NA POLYGON ((-44661.35 -132200...
-    ## 4  0       95  E POLYGON ((32657.37 -1322000...
-    ## 5  0       95  W POLYGON ((-170092 -1322000,...
-    ## 6  0       75  E POLYGON ((1147.896 -1322000...
-    ## 7  0       75  W POLYGON ((-123305.4 -132200...
-    ## 8  0       50  E POLYGON ((-38234.65 -132200...
-    ## 9  0       50  W POLYGON ((-101020.2 -132200...
-
 Mapping Wind Turbines and Whooping Crane Migratory Paths
 ========================================================
 
@@ -88,22 +41,60 @@ tm_shape(World, bbox = bb_us) +
 ![](analysis_files/figure-markdown_github/unnamed-chunk-3-2.png)
 
 ``` r
-#if (require(USAboundaries) && require(sf)) {
-  wind_belt <- us_states(states = c("Texas", "Wyoming",
-                                    "Kansas", "Montana",
-                                    "Nebraska", "Colorado",
-                                    "North Dakota", "New Mexico",
-                                    "South Dakota", "Iowa",
-                                    "Oklahoma", "Minnesota"),
-                         resolution = "high")
-   plot(st_geometry(wind_belt))
+devtools::install_github("ropensci/USAboundariesData")
+```
+
+    ## Skipping install of 'USAboundariesData' from a github remote, the SHA1 (a3db4fb6) has not changed since last install.
+    ##   Use `force = TRUE` to force installation
+
+``` r
+USAboundaries::install_data_package
+```
+
+    ## function () 
+    ## {
+    ##     instructions <- paste(" Please try installing the package for yourself", 
+    ##         "using the following command: \n", "    install.packages(\"USAboundariesData\",", 
+    ##         "repos = \"http://packages.ropensci.org\",", "type = \"source\")")
+    ##     error_func <- function(e) {
+    ##         stop(paste("Failed to install the USAboundariesData package.\n", 
+    ##             instructions))
+    ##     }
+    ##     if (interactive()) {
+    ##         input <- utils::menu(c("Yes", "No"), title = "Install the USAboundariesData package?")
+    ##         if (input == 1) {
+    ##             message("Installing the USAboundariesData package.")
+    ##             tryCatch(utils::install.packages("USAboundariesData", 
+    ##                 repos = "http://packages.ropensci.org", type = "source"), 
+    ##                 error = error_func, warning = error_func)
+    ##         }
+    ##         else {
+    ##             stop(paste("The USAboundariesData package provides the data you requested.\n", 
+    ##                 instructions))
+    ##         }
+    ##     }
+    ##     else {
+    ##         stop(paste("Failed to install the USAboundariesData package.\n", 
+    ##             instructions))
+    ##     }
+    ## }
+    ## <bytecode: 0x7f9c8e1eed20>
+    ## <environment: namespace:USAboundaries>
+
+``` r
+wind_belt <- USAboundaries::us_states(states = c("Texas", "Wyoming",
+                                  "Kansas", "Montana",
+                                  "Nebraska", "Colorado",
+                                  "North Dakota", "New Mexico",
+                                  "South Dakota", "Iowa",
+                                  "Oklahoma", "Minnesota"),
+                       resolution = "high")
+ plot(st_geometry(wind_belt))
 ```
 
 ![](analysis_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 ``` r
-#}
-
 tm_shape(wind_belt) +
   tm_polygons() +
   tm_shape(wind_turbines) +
@@ -274,9 +265,10 @@ turbine_per_state %>% arrange(desc(n))
 
 *From this analysis, we can see that Texas has the most turbines as wind generation there continues to grow. After Texas and California, the states with the next highest number of turbines are IA (Iowa), OK (Oklahoma) - right above Texas, and KS (Kansas). All of these states fall within the wind belt.*
 
+Next, I map the number of turbines per state using the Fifty States data. When using this data, the states are written lowercase and spelled out, not in abbreviations. As a result, it is important to convert each state id so that it correlates with the map.
+
 ``` r
 data("fifty_states")
-#fifty_states states written lower case and spelled out
 state_abbs <- tibble(state = str_to_lower(state.name), abb = state.abb)
 full_turbines<- left_join(turbine_per_state, state_abbs, by = c("state" = "abb")) %>%
   rename(id = state) %>%
@@ -51886,7 +51878,7 @@ df_us_final
     ## 10294                                                 <NA>       LC
     ## 10295                                                 <NA>       LC
 
-Get all species so that can filter by birds and bats
+Get all species so that can filter by birds within ...
 
 ``` r
 #api_calls <- purrr::map((0:10), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
@@ -51916,13 +51908,6 @@ Filter by birds
 #  select(id = result.taxonid, class = result.class_name, order = result.order_name, family = result.family_name, genus = #result.genus_name, scientific = result.scientific_name)
 
 #df_birds
-```
-
-Filter by bats
-
-``` r
-#all_df %>%
-#  filter(result.order_name == "CHIROPTERA")
 ```
 
 ``` r
