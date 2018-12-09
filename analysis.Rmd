@@ -38,11 +38,21 @@ whooping_crane_corridors
 ```
 
 # Mapping Wind Turbines and Whooping Crane Migratory Paths
-Next, I plot the maps of the location of wind turbines and whooping crane patterns using `ggplot` and the `geom_sf` command.
+Next, I plot the maps of the location of wind turbines and whooping crane patterns using the `tm_shape` command.
 ```{r}
-#ggplot(wind_turbines) + geom_sf()
 tm_shape(wind_turbines) + tm_dots()
+
+data("World")
+bb_us <- bb("United States", projection = "eck4")
+
+tm_shape(World, bbox = bb_us) +
+  tm_polygons() + 
+  tm_shape(wind_turbines) +
+  tm_dots()
+
 ```
+
+
 ```{r}
 ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
 ```
@@ -67,6 +77,31 @@ tm_shape(land) +
 
 ### Are there overlaps in the location of wind turbine sites and whooping crane migratory patterns?
 *Yes! By overlaying the three different shape files, we can see that where there is high wind in the United States (in the midwest), is where wind turbines are primarily located.*
+
+#Wind Turbine Analysis
+From USGS and USWTDB, I read in a csv with the location of land-based and offshore wind turbines. Specifically, I will analyze each of projects information, specifically regarding state, height, and year put in place.
+
+```{r}
+wind_csv = read_csv("uswtdbCSV/uswtdb_v1_2_20181001.csv")
+wind_csv
+```
+
+Analysis - group by state, graph height (and get none NA vals), what heights
+```{r}
+wind_csv %>% select(case_id,
+                    state = t_state,
+                    county = t_county,
+                    site_name = p_name,
+                    site_year = p_year,
+                    total_turbines = p_tnum,
+                    tower_height = t_hh,
+                    rotor_dia = t_rd,
+                    total_height = t_ttlh)
+
+```
+
+
+
 
 
 #Other bird populations?
@@ -94,7 +129,7 @@ Custom R functions
 Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct?
 Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues)
 Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton
-Use of spatial vector data (sf package) and visualization of spatial data
+[DONE] Use of spatial vector data (sf package) and visualization of spatial data
 
 
 
