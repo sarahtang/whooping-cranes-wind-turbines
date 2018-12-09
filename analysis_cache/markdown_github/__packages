@@ -16,3 +16,10 @@ tmap
 USAboundaries
 httr
 jsonlite
+tmaptools
+viridisLite
+viridis
+fiftystater
+maps
+mapproj
+bindrcpp

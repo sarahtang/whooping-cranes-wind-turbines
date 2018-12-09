@@ -11,6 +11,7 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 
 ## Set Up
 ```{r include=FALSE}
+devtools::install_github("wmurphyrd/fiftystater")
 library(tidyverse)
 library(ggplot2)
 library(sf)
@@ -19,6 +20,10 @@ library(tmaptools)
 library(USAboundaries)
 library(httr)
 library(jsonlite)
+library(viridis)
+library(fiftystater)
+library(mapproj)
+
 ```
 
 ## Introduction
@@ -80,26 +85,70 @@ tm_shape(land) +
 
 #Wind Turbine Analysis
 From USGS and USWTDB, I read in a csv with the location of land-based and offshore wind turbines. Specifically, I will analyze each of projects information, specifically regarding state, height, and year put in place.
+Data found here: https://eerscmap.usgs.gov/uswtdb/data/
+Metadata: https://eerscmap.usgs.gov/uswtdb/assets/data/uswtdb_v1_2_20181001.xml
 
 ```{r}
-wind_csv = read_csv("uswtdbCSV/uswtdb_v1_2_20181001.csv")
-wind_csv
+full_wind_csv = read_csv("uswtdbCSV/uswtdb_v1_2_20181001.csv")
+full_wind_csv
 ```
 
 Analysis - group by state, graph height (and get none NA vals), what heights
+
+t_hh refers to turbine hub height in m
+t_rsa refers to turbine rotor swept area in square meters
+t_ttlh refers to the height of the wind turbine from the ground to the tip of a vertically extended blade above the tower. (t_ttlh = t_hh + 1/2 rotor diameter)
+t_conf_atr referes to level of confidence in the turbine's attributes from low to high
+1. no confidence: no information found
+2. partial confidence: incomplete information or discrepancies found across data sources
+3. full confidence: consistent information across multiple data sources
+
 ```{r}
-wind_csv %>% select(case_id,
+wind_csv <- full_wind_csv %>% dplyr::select(case_id,
                     state = t_state,
-                    county = t_county,
                     site_name = p_name,
                     site_year = p_year,
                     total_turbines = p_tnum,
-                    tower_height = t_hh,
+                    rotor_swept_area = t_rsa,
+                    hub_height = t_hh,
                     rotor_dia = t_rd,
-                    total_height = t_ttlh)
-
+                    total_height = t_ttlh,
+                    confidence = t_conf_atr)
+wind_csv
 ```
 
+State analysis - number of turbines per states
+```{r}
+turbine_per_state <- wind_csv %>%
+  filter(state != "GU") %>% #not real states: GU and PR
+  filter(state != "PR") %>%
+  count(state)
+
+turbine_per_state %>% arrange(desc(n))
+```
+*From this analysis, we can see that Texas has the most turbines as wind generation there continues to grow. After Texas and California, the states with the next highest number of turbines are IA (Iowa), OK (Oklahoma) - right above Texas, and KS (Kansas). All of these states fall within the wind belt.*
+
+
+```{r}
+data("fifty_states")
+#fifty_states states written lower case and spelled out
+state_abbs <- tibble(state = str_to_lower(state.name), abb = state.abb)
+full_turbines<- left_join(turbine_per_state, state_abbs, by = c("state" = "abb")) %>%
+  rename(id = state) %>%
+  rename(full_state = state.y) %>%
+  rename(num_turbines = n)
+
+ggplot(full_turbines, aes(map_id = full_state)) +
+  geom_map(aes(fill = num_turbines), map = fifty_states) +
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+  scale_fill_viridis() +
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "")
+```
+
+## Filter wind turbines by height
 
 
 
@@ -121,6 +170,8 @@ df <- jsonlite::fromJSON(out)
 rationale <- df$rationale
 df
 ```
+
+
 
 
 #TODO:

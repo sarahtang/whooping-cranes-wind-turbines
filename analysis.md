@@ -65,14 +65,25 @@ whooping_crane_corridors
 Mapping Wind Turbines and Whooping Crane Migratory Paths
 ========================================================
 
-Next, I plot the maps of the location of wind turbines and whooping crane patterns using `ggplot` and the `geom_sf` command.
+Next, I plot the maps of the location of wind turbines and whooping crane patterns using the `tm_shape` command.
 
 ``` r
-#ggplot(wind_turbines) + geom_sf()
 tm_shape(wind_turbines) + tm_dots()
 ```
 
 ![](analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+``` r
+data("World")
+bb_us <- bb("United States", projection = "eck4")
+
+tm_shape(World, bbox = bb_us) +
+  tm_polygons() + 
+  tm_shape(wind_turbines) +
+  tm_dots()
+```
+
+![](analysis_files/figure-markdown_github/unnamed-chunk-3-2.png)
 
 ``` r
 ggplot(whooping_crane_corridors) + geom_sf() + ggtitle("Whooping Crane Migration Corridor")
@@ -151,6 +162,180 @@ tm_shape(land) +
 
 *Yes! By overlaying the three different shape files, we can see that where there is high wind in the United States (in the midwest), is where wind turbines are primarily located.*
 
+Wind Turbine Analysis
+=====================
+
+From USGS and USWTDB, I read in a csv with the location of land-based and offshore wind turbines. Specifically, I will analyze each of projects information, specifically regarding state, height, and year put in place. Data found here: <https://eerscmap.usgs.gov/uswtdb/data/> Metadata: <https://eerscmap.usgs.gov/uswtdb/assets/data/uswtdb_v1_2_20181001.xml>
+
+``` r
+full_wind_csv = read_csv("uswtdbCSV/uswtdb_v1_2_20181001.csv")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   .default = col_character(),
+    ##   case_id = col_integer(),
+    ##   usgs_pr_id = col_integer(),
+    ##   p_year = col_integer(),
+    ##   p_tnum = col_integer(),
+    ##   p_cap = col_double(),
+    ##   t_cap = col_integer(),
+    ##   t_hh = col_double(),
+    ##   t_rd = col_double(),
+    ##   t_rsa = col_double(),
+    ##   t_ttlh = col_double(),
+    ##   t_conf_atr = col_integer(),
+    ##   t_conf_loc = col_integer(),
+    ##   xlong = col_double(),
+    ##   ylat = col_double()
+    ## )
+
+    ## See spec(...) for full column specifications.
+
+``` r
+full_wind_csv
+```
+
+    ## # A tibble: 58,185 x 24
+    ##    case_id faa_ors faa_asn usgs_pr_id t_state t_county t_fips p_name p_year
+    ##      <int> <chr>   <chr>        <int> <chr>   <chr>    <chr>  <chr>   <int>
+    ##  1 3073429 missing missing       4960 CA      Kern Co… 06029  251 W…   1987
+    ##  2 3071522 missing missing       4997 CA      Kern Co… 06029  251 W…   1987
+    ##  3 3073425 missing missing       4957 CA      Kern Co… 06029  251 W…   1987
+    ##  4 3071569 missing missing       5023 CA      Kern Co… 06029  251 W…   1987
+    ##  5 3005252 missing missing       5768 CA      Kern Co… 06029  251 W…   1987
+    ##  6 3003862 missing missing       5836 CA      Kern Co… 06029  251 W…   1987
+    ##  7 3073370 missing missing       4948 CA      Kern Co… 06029  251 W…   1987
+    ##  8 3010101 missing missing       5828 CA      Kern Co… 06029  251 W…   1987
+    ##  9 3073324 missing missing       4965 CA      Kern Co… 06029  251 W…   1987
+    ## 10 3072659 missing missing       5044 CA      Kern Co… 06029  251 W…   1987
+    ## # ... with 58,175 more rows, and 15 more variables: p_tnum <int>,
+    ## #   p_cap <dbl>, t_manu <chr>, t_model <chr>, t_cap <int>, t_hh <dbl>,
+    ## #   t_rd <dbl>, t_rsa <dbl>, t_ttlh <dbl>, t_conf_atr <int>,
+    ## #   t_conf_loc <int>, t_img_date <chr>, t_img_srce <chr>, xlong <dbl>,
+    ## #   ylat <dbl>
+
+Analysis - group by state, graph height (and get none NA vals), what heights
+
+t\_hh refers to turbine hub height in m t\_rsa refers to turbine rotor swept area in square meters t\_ttlh refers to the height of the wind turbine from the ground to the tip of a vertically extended blade above the tower. (t\_ttlh = t\_hh + 1/2 rotor diameter) t\_conf\_atr referes to level of confidence in the turbine's attributes from low to high 1. no confidence: no information found 2. partial confidence: incomplete information or discrepancies found across data sources 3. full confidence: consistent information across multiple data sources
+
+``` r
+wind_csv <- full_wind_csv %>% dplyr::select(case_id,
+                    state = t_state,
+                    site_name = p_name,
+                    site_year = p_year,
+                    total_turbines = p_tnum,
+                    rotor_swept_area = t_rsa,
+                    hub_height = t_hh,
+                    rotor_dia = t_rd,
+                    total_height = t_ttlh,
+                    confidence = t_conf_atr)
+wind_csv
+```
+
+    ## # A tibble: 58,185 x 10
+    ##    case_id state site_name site_year total_turbines rotor_swept_area
+    ##      <int> <chr> <chr>         <int>          <int>            <dbl>
+    ##  1 3073429 CA    251 Wind       1987            194            -9999
+    ##  2 3071522 CA    251 Wind       1987            194            -9999
+    ##  3 3073425 CA    251 Wind       1987            194            -9999
+    ##  4 3071569 CA    251 Wind       1987            194            -9999
+    ##  5 3005252 CA    251 Wind       1987            194            -9999
+    ##  6 3003862 CA    251 Wind       1987            194            -9999
+    ##  7 3073370 CA    251 Wind       1987            194            -9999
+    ##  8 3010101 CA    251 Wind       1987            194            -9999
+    ##  9 3073324 CA    251 Wind       1987            194            -9999
+    ## 10 3072659 CA    251 Wind       1987            194            -9999
+    ## # ... with 58,175 more rows, and 4 more variables: hub_height <dbl>,
+    ## #   rotor_dia <dbl>, total_height <dbl>, confidence <int>
+
+State analysis - number of turbines per states
+
+``` r
+turbine_per_state <- wind_csv %>%
+  filter(rotor_swept_area != -9999.00) %>%
+  filter(state != "GU") %>% #not real states: GU and PR
+  filter(state != "PR") %>%
+  count(state)
+
+turbine_per_state %>% arrange(desc(n))
+```
+
+    ## # A tibble: 41 x 2
+    ##    state     n
+    ##    <chr> <int>
+    ##  1 TX    12922
+    ##  2 CA     5717
+    ##  3 IA     4153
+    ##  4 OK     3715
+    ##  5 KS     2790
+    ##  6 IL     2568
+    ##  7 MN     2499
+    ##  8 CO     1987
+    ##  9 OR     1868
+    ## 10 WA     1725
+    ## # ... with 31 more rows
+
+``` r
+#attempt working with states
+data("fifty_states")
+
+#fifty_states states written lower case and spelled out
+state_abbs <- tibble(state = str_to_lower(state.name), abb = state.abb)
+state_abbs
+```
+
+    ## # A tibble: 50 x 2
+    ##    state       abb  
+    ##    <chr>       <chr>
+    ##  1 alabama     AL   
+    ##  2 alaska      AK   
+    ##  3 arizona     AZ   
+    ##  4 arkansas    AR   
+    ##  5 california  CA   
+    ##  6 colorado    CO   
+    ##  7 connecticut CT   
+    ##  8 delaware    DE   
+    ##  9 florida     FL   
+    ## 10 georgia     GA   
+    ## # ... with 40 more rows
+
+``` r
+full_turbines<- left_join(turbine_per_state, state_abbs, by = c("state" = "abb")) %>%
+  rename(id = state) %>%
+  rename(full_state = state.y) %>%
+  rename(num_turbines = n)
+full_turbines
+```
+
+    ## # A tibble: 41 x 3
+    ##    id    num_turbines full_state 
+    ##    <chr>        <int> <chr>      
+    ##  1 AK             121 alaska     
+    ##  2 AZ             144 arizona    
+    ##  3 CA            5717 california 
+    ##  4 CO            1987 colorado   
+    ##  5 CT               2 connecticut
+    ##  6 DE               1 delaware   
+    ##  7 HI             119 hawaii     
+    ##  8 IA            4153 iowa       
+    ##  9 ID             541 idaho      
+    ## 10 IL            2568 illinois   
+    ## # ... with 31 more rows
+
+``` r
+ggplot(full_turbines, aes(map_id = full_state)) +
+  geom_map(aes(fill = num_turbines), map = fifty_states) +
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+  scale_fill_viridis() +
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  labs(x = "", y = "")
+```
+
+![](analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
+
 Other bird populations?
 =======================
 
@@ -164,7 +349,7 @@ resp
 ```
 
     ## Response [http://api.iucnredlist.org/index/species/Grus-americana.json]
-    ##   Date: 2018-12-08 02:41
+    ##   Date: 2018-12-09 05:46
     ##   Status: 200
     ##   Content-Type: application/json; charset=utf-8
     ##   Size: 1.02 kB
@@ -196,7 +381,7 @@ df
 TODO:
 =====
 
-Custom R functions Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct? Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues) Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton Use of spatial vector data (sf package) and visualization of spatial data
+Custom R functions Interaction with an API? - maybe just get the birds? what birds are potentially endangered/extinct? Use lintr to clean code (checks adherence to a given style, syntax errors and possible semantic issues) Making layout and presentation into secondary output (e.g. .pdf, website) - should enhance presentaiton \[DONE\] Use of spatial vector data (sf package) and visualization of spatial data
 
 TODO
 ====
