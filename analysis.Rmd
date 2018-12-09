@@ -253,7 +253,7 @@ df_us <- jsonlite::fromJSON(out_test)
 
 df_us_final <- plyr::ldply(df_us, data.frame)
 df_us_final %>%
-  select(taxonid, scientific_name, category) %>%
+  #select(taxonid, scientific_name, category) %>%
   filter(!is.na(scientific_name))
 ```
 
@@ -295,7 +295,6 @@ Getting rationale for each
 Custom R function to create an api call given the genus and species so that I can get the rationale for each bird within the United States
 
 ```{r}
-
 api_call_threats <- paste0("http://apiv3.iucnredlist.org/api/v3/threats/species/name/", genus, "%20", species, "?token=", token)
 api_call_threats
 
@@ -306,26 +305,12 @@ api_threat <- function(genus, species) {
   status <- httr::status_code(response)
   out <- httr::content(response, as = "text")
   df <- jsonlite::fromJSON(out)
-  df
-}
-
-df_bird_threats <- map2_dfr(us_birds$genus[1:5], us_birds$species[1:5], api_threat)
-df_bird_threats
-
-
-api_fn <- function(genus, species) {
-  api_call <- paste0("http://api.iucnredlist.org/index/species/", genus, "-", species, ".json")
-  Sys.sleep(0.5)
-  
-  out <- httr::content(resp, as = "text")
-  df <- jsonlite::fromJSON(out)
-  rationale <- df$rationale
   
   data_frame(Genus = genus, Species = species, API = api_call, rationale = rationale, status_code = status)
 }
 
-df_all_birds_us <- map2_dfr(us_birds$genus[1:2], us_birds$species[1:2], api_fn)
-df_all_birds_us
+df_bird_threats <- map2_dfr(us_birds$genus[1:5], us_birds$species[1:5], api_threat)
+df_bird_threats
 ```
 
 Instead of doing the above, I can extract threats for each species and parse through those?
