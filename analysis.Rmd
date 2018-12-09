@@ -11,14 +11,14 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 
 ## Set Up
 ```{r include=FALSE}
-library("tidyverse")
+library(tidyverse)
 library(ggplot2)
 library(sf)
 library(tmap)
 library(tmaptools)
-library("USAboundaries")
-library("httr")
-library("jsonlite")
+library(USAboundaries)
+library(httr)
+library(jsonlite)
 ```
 
 ## Introduction
