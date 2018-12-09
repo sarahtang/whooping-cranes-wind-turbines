@@ -17,6 +17,7 @@ USAboundaries: https://lincolnmullen.com/software/usaboundaries/
 devtools::install_github("wmurphyrd/fiftystater")
 
 library(tidyverse)
+library(dplyr)
 library(ggplot2)
 library(sf)
 library(tmap)
@@ -246,7 +247,7 @@ df_us <- jsonlite::fromJSON(out_test)
 
 df_us_final <- plyr::ldply(df_us, data.frame)
 df_us_final %>%
-  select(scientific = scientific_name) %>%
+  dplyr::select(scientific = scientific_name) %>%
   filter(!is.na(scientific))
 
 df_us_final
@@ -255,42 +256,42 @@ df_us_final
 
 Get all species so that can filter by birds and bats
 ```{r}
-api_calls <- purrr::map((0:10), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
+#api_calls <- purrr::map((0:10), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
 
-resp2 <- purrr::map(api_calls[1:10], function(url){
-  Sys.sleep(0.5)
-  httr::GET(url)
-})
+#resp2 <- purrr::map(api_calls[1:10], function(url){
+#  Sys.sleep(0.5)
+#  httr::GET(url)
+#})
 
-out <- purrr::map(resp2, httr::content, as = "text")
-df_page <- purrr::map(out, jsonlite::fromJSON)
-df_page
+#out <- purrr::map(resp2, httr::content, as = "text")
+#df_page <- purrr::map(out, jsonlite::fromJSON)
+#df_page
 
-all_df <- plyr::ldply(df_page, data.frame)
-all_df
+#all_df <- plyr::ldply(df_page, data.frame)
+#all_df
 ```
 
 Filter by birds
 ```{r}
-df_birds <- all_df %>%
-  filter(result.phylum_name == "CHORDATA") %>%
-  filter(result.class_name == "AVES") %>%
-  filter(result.order_name != "GALLIFORMES") %>% #landfowl
-  filter(result.order_name != "STRUTHIONIFORMES") %>% #rheas
-  filter(result.order_name != "ANSERIFORMES") %>% #waterfowl
-  select(id = result.taxonid, class = result.class_name, order = result.order_name, family = result.family_name, genus = result.genus_name, scientific = result.scientific_name)
+#df_birds <- all_df %>%
+#  filter(result.phylum_name == "CHORDATA") %>%
+#  filter(result.class_name == "AVES") %>%
+#  filter(result.order_name != "GALLIFORMES") %>% #landfowl
+#  filter(result.order_name != "STRUTHIONIFORMES") %>% #rheas
+#  filter(result.order_name != "ANSERIFORMES") %>% #waterfowl
+#  select(id = result.taxonid, class = result.class_name, order = result.order_name, family = result.family_name, genus = #result.genus_name, scientific = result.scientific_name)
 
-df_birds
+#df_birds
 
 ```
 Filter by bats
 ```{r}
-all_df %>%
-  filter(result.order_name == "CHIROPTERA")
+#all_df %>%
+#  filter(result.order_name == "CHIROPTERA")
 ```
 
 ```{r}
-inner_join(df_us_final, df_birds, by = order)
+#inner_join(df_us_final, df_birds, by = order)
 ```
 
 
