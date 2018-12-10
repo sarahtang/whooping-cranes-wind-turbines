@@ -1,5 +1,5 @@
 ---
-title: "Wind Turbine and Bird Analysis"
+title: "Wind Turbine and Whooping Crane Analysis"
 maketitle: true
 author: Sarah Tang
 output: github_document
@@ -10,13 +10,13 @@ knitr::opts_chunk$set(messages = FALSE, warnings = FALSE, cache = TRUE)
 ```
 
 ## Set Up
-Fifty Stater: https://github.com/wmurphyrd/fiftystater
-USAboundaries: https://lincolnmullen.com/software/usaboundaries/
-I load in libraries to make API calls, use data visualization packages, and overlay visuals with maps.
+My first steps were to load in the appropriate libraries and packages to make API Calls and visualize and analyze data using maps.
+
+Fifty Stater: https://github.com/wmurphyrd/fiftystater \n
+USAboundaries: https://lincolnmullen.com/software/usaboundaries/ \n
 
 ```{r include=FALSE, echo=FALSE}
 devtools::install_github("wmurphyrd/fiftystater")
-
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
@@ -36,11 +36,14 @@ library(purrr)
 ## Introduction
 This module aims to examine and better understand how wind turbine development impacts bird populations, specifically for the whooping crane (Grus americana), one of the most endangered birds in North America. As land use needed for wind energy increases, it is crucial to understand the relationship between wind turbines, both while operating and installing, and animals' responses and wildlife habitat.
 
-Whooping crane corridor - https://www.sciencebase.gov/catalog/item/5a314a72e4b08e6a89d707e0
-Whooping crane - https://www.arcgis.com/home/item.html?id=7d27571bc3454a1c91edf665c67b9c3e
+Throughout this module, I analyze spatial data to examine how the migratory corridor for whooping cranes overlaps with the placement of wind turbines. Later on, I use the IUCN api to determine what other species may be at risk because of renewable energy development.
+
+Whooping crane corridor - https://www.sciencebase.gov/catalog/item/5a314a72e4b08e6a89d707e0 \n
+Whooping crane - https://www.arcgis.com/home/item.html?id=7d27571bc3454a1c91edf665c67b9c3e \n
 
 ## Loading in files
-Data access
+I access the data and read in the necessary files. In this case, I load in shape file for both the wind turbine locations and the whooping crane migratory corridor.
+
 ```{r echo=FALSE}
 wind_turbines <- st_read("uswtdbSHP/uswtdb_v1_2_20181001.shp", quiet = TRUE)
 whooping_crane_corridors <-
@@ -48,23 +51,28 @@ whooping_crane_corridors <-
 ```
 
 # Mapping Wind Turbines and Whooping Crane Migratory Paths
-Next, I plot the maps of the location of wind turbines and whooping crane patterns using the `tm_shape` command. Data preparation and initial data visualization.
+Next, I plot the maps of the location of wind turbines and whooping crane patterns using the `tm_shape` command. The first map is the initial data visualization and the latter shows the location of the wind turbines on top of a map of the United States. At a quick glance, there seems to be a lot of wind turbines in the Midwest area of the United States.
+
+###Location of Wind Turbines in the United States
 ```{r}
 tm_shape(wind_turbines) +
   tm_dots()
-
-data("World")
-bb_us <- bb("United States", projection = "eck4")
-
-tm_shape(World, bbox = bb_us) +
-  tm_polygons() +
-  tm_shape(wind_turbines) +
-  tm_dots() + 
-  labs(title = "Locations of Wind Turbines in the US")
-
 ```
 
 
+```{r}
+data("World")
+bb_us <- bb("United States", projection = "eck4")
+tm_shape(World, bbox = bb_us) +
+  tm_polygons() +
+  tm_shape(wind_turbines) +
+  tm_dots(title = "Location of Wind Turbines in the US")
+
+```
+
+In order to better visualize the data in the Midwest region of the United States, where the main wind belt is, I create a wind belt object with the states in that area. Doing so allows me to create a more detailed visualization of where exactly the wind turbines are and what states they are located in.
+
+###Location of Wind turbines within the wind belt
 ```{r}
 devtools::install_github("ropensci/USAboundariesData")
 USAboundaries::install_data_package
@@ -82,20 +90,19 @@ tm_shape(wind_belt) +
   tm_polygons() +
   tm_shape(wind_turbines) +
   tm_dots()
-
-
 ```
-
-
+The map below shows the Whooping Crane migration corridor based off the data read in. This isn't particularly helpful as there are no coordinates or map beneath it to ground the data to a specific place.
 ```{r}
 ggplot(whooping_crane_corridors) + geom_sf() +
   ggtitle("Whooping Crane Migration Corridor")
+```
 
+After I overlay the migration corridor onto my wind belt object, the location and potential for overlap becomes much more clear.
+```{r}
 tm_shape(wind_belt) +
-  tm_polygons("state_name", title = "Whooping Crane Migration Corridor through the US") +
+  tm_polygons("state_name", title = "Whooping Crane Flight in US") +
   tm_shape(whooping_crane_corridors) +
   tm_polygons()
-
 ```
 
 I then overlay the two maps onto a map of the United States.
@@ -116,9 +123,9 @@ tm_shape(wind_belt) +
 *Yes! By overlaying the three different shape files, we can see that where there is high wind in the United States (in the midwest), is where wind turbines are primarily located.*
 
 #Wind Turbine Analysis
-From USGS and USWTDB, I read in a csv with the location of land-based and offshore wind turbines. Specifically, I will analyze each of projects information, specifically regarding state, height, and year put in place.
-Data found here: https://eerscmap.usgs.gov/uswtdb/data/
-Metadata: https://eerscmap.usgs.gov/uswtdb/assets/data/uswtdb_v1_2_20181001.xml
+From USGS and USWTDB, I read in a csv with the location of land-based and offshore wind turbines. Specifically, I will analyze each of the projects information, specifically regarding state location and height of the turbine.
+Data found here: https://eerscmap.usgs.gov/uswtdb/data/ \n
+Metadata: https://eerscmap.usgs.gov/uswtdb/assets/data/uswtdb_v1_2_20181001.xml \n
 
 ```{r}
 full_wind_csv <- read_csv("uswtdbCSV/uswtdb_v1_2_20181001.csv")
@@ -129,15 +136,13 @@ total_num_turbines
 ```
 *Our dataset looks at a total of 58,185 tubines.*
 
-Analysis - group by state, graph height (and get none NA vals), what heights
+The columns of interest for my analysis of turbines are: \n
+1. t_hh: refers to the turbine hub height in meters \n
+2. t_rsa: refers to the turbine rotor swept area in square meters \n
+3. t_ttlh: refers to the height of the wind turbine from the ground to the tip of a vertially extended blade above the tower (t_ttlh = t_hh + 1/2 rotor diameter) \n
+4. t_conf_atr: refers to the level of confidence in the turbine's attributes from low to hight where 1 is no confidence (no information) and 3 is full confidence (consistent information across multiple data sources)
 
-t_hh refers to turbine hub height in m
-t_rsa refers to turbine rotor swept area in square meters
-t_ttlh refers to the height of the wind turbine from the ground to the tip of a vertically extended blade above the tower. (t_ttlh = t_hh + 1/2 rotor diameter)
-t_conf_atr referes to level of confidence in the turbine's attributes from low to high
-1. no confidence: no information found
-2. partial confidence: incomplete information or discrepancies found across data sources
-3. full confidence: consistent information across multiple data sources
+First, I select for the desired attributes.
 
 ```{r}
 wind_csv <- full_wind_csv %>% dplyr::select(case_id,
@@ -153,7 +158,7 @@ wind_csv <- full_wind_csv %>% dplyr::select(case_id,
 wind_csv
 ```
 
-State analysis - number of turbines per states
+Next, I perform an analysis of the number of turbines per state. I need to filter for states that do not exist that were within the data, specifically "GU" and "PR".
 ```{r}
 turbine_per_state <- wind_csv %>%
   filter(state != "GU") %>% #not real states: GU and PR
@@ -183,9 +188,10 @@ ggplot(full_turbines, aes(map_id = full_state)) +
   scale_y_continuous(breaks = NULL) +
   labs(title = "Number of Turbines per state in the US", x = "", y = "")
 ```
+*With this visual map and analysis, it is more clear to see that Texas leads the country with the highest number of wind turbines. Following behind it is California, and then some other states in the Midwest region.* 
 
 ## Filter wind turbines by height
-Whooping cranes fly during migration between 15 and 1800 meters above the ground. They usually fly around 500 m off the ground (Source: https://journeynorth.org/tm/crane/MigrationDay_BJohns.html).
+Whooping cranes fly during migration between 15 and 1800 meters above the ground. They usually fly around 500 m off the ground (Source: https://journeynorth.org/tm/crane/MigrationDay_BJohns.html). Knowing this, I filter the dangerous wind turbines to be those whose rotors fall within the distance of 15 and 1800 m, where a Whooping Crane could potentially get caught and hit.
 
 ```{r}
 wind_belt_states <- c("Texas", "Wyoming",
@@ -214,9 +220,9 @@ percent_dangerous * 100
 *56 percent of turbines could potentially be dangerous for whooping crane populations based on their rotor height. Wind turbine siting is extremely important in order to limit the number of bird deaths, especially for species that are already endangered.*
 
 
-#Other bird populations?
+#Other bird populations: API calls
 
-Just want to look through api list for genus and species of birds and bats (not necessarily ones that are already extinct)
+The second section of my project is to use the IUCN API in order to determine what bird species in the United States may be at risk and threatened by wind turbine development. First, I provide some background information about the main species of interest. While only updated in 2012, the species was listed as endangered and was making a strong comeback. Updated data and more targeted studies will be needed to determine the impact of wind turbines on Whooping Crane migration.
 ```{r}
 genus <- "Grus"
 species <- "americana"
@@ -225,21 +231,15 @@ api_call <- paste0("http://api.iucnredlist.org/index/species/",
 
 resp <- httr::GET(api_call)
 resp
-
 status <- httr::status_code(resp)
-
 out <- httr::content(resp, as = "text")
 df <- jsonlite::fromJSON(out)
 rationale <- df$rationale
 df
 ```
 
-Working with API and token
-
-All species
-
-Gettings all the species within the United States.
-Interaction with an api
+##All species vs. US species
+I used the API to get all of the species found within the United States. This list of species consists of plants, mammals, birds, reptiles, etc.
 ```{r echo=FALSE}
 token <- ("9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")
 token
@@ -256,7 +256,7 @@ df_us_final <- df_us_final %>%
   filter(!is.na(scientific_name))
 ```
 
-Getting all 10 pages of species so that I can match them up with the species found within the United States
+I got all 10 pages of species so that I could match them up with the species found within the United States.
 ```{r}
 api_calls <- purrr::map((7:9), function(page_num){paste0("http://apiv3.iucnredlist.org/api/v3/species/page/", page_num, "?token=9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee")})
 
@@ -271,11 +271,11 @@ all_df <- plyr::ldply(df_page, data.frame)
 
 all_df <- all_df %>%
   mutate(scientific_name = result.scientific_name)
-all_df
 ```
 
-Combine all species with the US species
-Use of regular expressions to extract the species from the scientific name
+##US Bird Species (and regular expressions!)
+In order to get all the bird species with the United States, I combine all of the species with all of those within the United States. This allowed me to filter for the class Aves. Additionally, I used regular expressions to extract the species name from the scientific name. I then used the genus and species name to make the needed API calls later on!
+
 ```{r}
 us_all <- left_join(df_us_final, all_df, by = "scientific_name")
 
@@ -289,12 +289,12 @@ us_birds <- us_all %>%
   mutate(species2 = stringr::str_extract(species, "\\S+"))
 ```
 
-Getting rationale for each
-Custom R function to create an api call given the genus and species so that I can get the rationale for each bird within the United States
+##Threats to Birds
+
+To get the associated threats for each bird species, I created two custom R functions. The first makes the necessary API calls to get the timing, scope, severity, and score for each potential threat and bird. The second R function makes calls to the first function and binds the respective dataframes together. One issue that I originally ran into was how to deal with data frames of different sizes as each bird is associated with different threats and may have no threats. To handle these different cases, I made sure to have an error handler to set the values to NA as well as binding the dataframes together. I make the API calls on only a portion of the species because of the timing it would take for the entire bird population within the United States.
 
 ```{r}
 df_all_threats <- data.frame()
-  #api_threat("Grus", "americana")
 df_all_threats
 
 api_threat <- function(genus, species) {
@@ -326,13 +326,16 @@ call_api_threat <- function(genus, species, df = df_all_threats) {
   rbind(df, rv)
 }
 
-call_api_threat(us_birds$genus[1], us_birds$species2[1], df_all_threats)
+df_threats <- map2_dfr(us_birds$genus[1:300], us_birds$species2[1:300], call_api_threat)
 
-df_threats <- map2_dfr(us_birds$genus[1:200], us_birds$species2[1:200], call_api_threat)
 df_threats %>% 
-  filter(timing != "Past, Unlikely to Return")
+  filter(timing != "Past, Unlikely to Return") %>% #filter by relevant threats
+  filter(!str_detect(threat, "species")) %>% #no invasive or competitive species
+  count(threat) %>%
+  arrange(desc(n))
 ```
+By examining the different threats that bird species within the United States face, I can see how the threat of renewable energy and wind turbine development falls compared to other categories. The most prevalent threat among species is habitat shifting and alteration, followed by hunting & trapping terrestrial animals. Ultimately, human interference with animal habitats is impacting their survival.
 
-Instead of doing the above, I can extract threats for each species and parse through those?
+*Approximately 4 percent of birds are impacted by renewable energy. And while it more often has a low to medium impact on a a minority of the population, this problem is ongoing. Additionally, as the number of wind turbines increases and as such technologies become more prevalent, they will continue to threaten bird populations.*
 
-Overall, the next steps are to further examine how positioning and siting can alter migration patterns of whooping cranes as well as the other bird species listed above.
+Overall, the future steps for this project are to further examine how positioning and siting of wind turbines can either alter migration patterns of whooping cranes as well as the other bird species or reduce their population sizes. In this module, I was able to show a correlation between the two locations, but not a causation between the two. More research is needed in this area as well as increased regulations regarding how and where wind turbines are constructed.

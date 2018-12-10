@@ -7,7 +7,9 @@
 
 ## assignment
 
-In this module, I use and analyze spatial vector data as well as visualize the spatial data. I also use more than 5 dplyr verbs.
+The goal of this assignment is to get a better understanding of the relationship between the siting and location of wind turbines and the Whooping Crane population, mainly in terms of location of the turbines compared to the bird's migration corridor. By performing spatial analysis, it is clear that the two overlap, which may be causing increased deaths of the Whooping Crane population. Additionally, by examining the rotor height of these wind turbines, we can see that there is overlap between the common flying height and the rotor height. Overall, there are correlations both in location and space with wind turbines and where Whooping Cranes fly. Moreover, other bird species may be at risk as well based on their flying patterns.
+
+In this module, I use and analyze spatial vector data as well as visualize the spatial data. I also perform analysis on the height and location of wind turbines using dplyr verbs as well as further analyze potential bird species at risk using API calls to the IUCN database.
 
 All work for this assignment is in the `analysis` directory.
 
