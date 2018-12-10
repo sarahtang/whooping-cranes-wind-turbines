@@ -285,32 +285,52 @@ us_birds <- us_all %>%
   dplyr::select(scientific_name, class = result.class_name,
          order = result.order_name,
          genus = result.genus_name, category) %>%
-  mutate(species = stringr::str_extract(scientific_name, "(\\s+\\S+)"))
-us_birds
+  mutate(species = stringr::str_extract(scientific_name, "(?:\\s+\\S+)")) %>%
+  mutate(species2 = stringr::str_extract(species, "\\S+"))
 ```
 
 Getting rationale for each
 Custom R function to create an api call given the genus and species so that I can get the rationale for each bird within the United States
 
 ```{r}
-api_call_threats <- paste0("http://apiv3.iucnredlist.org/api/v3/threats/species/name/", genus, "%20", species, "?token=", token)
-api_call_threats
+df_all_threats <- data.frame()
+  #api_threat("Grus", "americana")
+df_all_threats
 
 api_threat <- function(genus, species) {
-  genus <- "Grus"
-  species <- "americana"
   api_call_threats <- paste0("http://apiv3.iucnredlist.org/api/v3/threats/species/name/", 
                              genus, "%20", species, "?token=", token)
   response <- httr::GET(api_call_threats)
   status <- httr::status_code(response)
   out <- httr::content(response, as = "text")
   df_threat <- jsonlite::fromJSON(out)
-  data_frame(Genus =)
-  #data_frame(Genus = genus, Species = species, API = api_call_threats, status_code = status, type = title, timing = timing, scope = scope, severity = severity, score = score)
+  result <- df_threat$result
+  length(result)
+  if (length(result) == 0) {
+    df_species <- data_frame(Genus = genus, Species = species, threat = NA, timing = NA,
+             scope = NA, severity = NA, score = NA)
+  } else {
+    title <- df_threat$result$title
+    timing <- df_threat$result$timing
+    scope <- df_threat$result$scope
+    severity <- df_threat$result$severity
+    score <- df_threat$result$score
+    
+    df_species <- data_frame(Genus = genus, Species = species, threat = title, timing = timing,
+               scope = scope, severity = severity, score = score)
+  }
 }
 
-#df_bird_threats <- map2_dfr(us_birds$genus[1:5], us_birds$species[1:5], api_threat)
-#df_bird_threats
+call_api_threat <- function(genus, species, df = df_all_threats) {
+  rv <- api_threat(genus, species)
+  rbind(df, rv)
+}
+
+call_api_threat(us_birds$genus[1], us_birds$species2[1], df_all_threats)
+
+df_threats <- map2_dfr(us_birds$genus[1:200], us_birds$species2[1:200], call_api_threat)
+df_threats %>% 
+  filter(timing != "Past, Unlikely to Return")
 ```
 
 Instead of doing the above, I can extract threats for each species and parse through those?
